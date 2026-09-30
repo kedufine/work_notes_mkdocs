@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""인수인계 자료 원본 폴더의 모든 파일을 마크다운 중간본으로 변환한다.
+"""인수인계 자료 원본 폴더(1. RAW)의 모든 파일을 마크다운 중간본으로 변환한다.
 
 - kordoc: HWP·HWPX·HWPML·PDF·DOCX·XLS(X)·이미지
 - OfficeCLI: PPTX (DOCX·XLSX는 kordoc 실패 시 대체 경로)
@@ -27,7 +27,7 @@ from pathlib import Path
 
 # 프로젝트 루트: .agents/skills/handover-to-mkdocs/scripts/convert.py 기준 네 단계 위
 ROOT = Path(__file__).resolve().parents[4]
-DEFAULT_SOURCE = ROOT / "1. 인수인계 자료 원본"
+DEFAULT_SOURCE = ROOT / "1. RAW"
 DEFAULT_OUT = ROOT / "2. 변환 중간본"
 MANIFEST_NAME = "manifest.json"
 REPORT_NAME = "변환 보고서.md"
@@ -46,23 +46,24 @@ CSV_EXT = {".csv", ".tsv"}
 
 # 변환하지 않고 보고서에 조치 방법만 남기는 형식
 UNSUPPORTED_HINTS = {
-    ".doc": "Word에서 열어 .docx로 다시 저장한 뒤 원본 폴더에 넣으십시오.",
-    ".ppt": "PowerPoint에서 열어 .pptx로 다시 저장한 뒤 원본 폴더에 넣으십시오.",
-    ".pps": "PowerPoint에서 열어 .pptx로 다시 저장한 뒤 원본 폴더에 넣으십시오.",
-    ".ppsx": "PowerPoint에서 열어 .pptx로 다시 저장한 뒤 원본 폴더에 넣으십시오.",
-    ".rtf": "Word에서 열어 .docx로 다시 저장한 뒤 원본 폴더에 넣으십시오.",
-    ".zip": "압축을 풀어 같은 위치에 폴더로 넣으십시오.",
-    ".7z": "압축을 풀어 같은 위치에 폴더로 넣으십시오.",
-    ".egg": "압축을 풀어 같은 위치에 폴더로 넣으십시오.",
-    ".alz": "압축을 풀어 같은 위치에 폴더로 넣으십시오.",
-    ".rar": "압축을 풀어 같은 위치에 폴더로 넣으십시오.",
+    # 남겨 두면 매번 미지원으로 보고되므로 다시 저장한 파일로 바꿔 넣도록 안내한다
+    ".doc": "Word에서 열어 .docx로 다시 저장하고, 원래 파일과 바꿔 넣으십시오.",
+    ".ppt": "PowerPoint에서 열어 .pptx로 다시 저장하고, 원래 파일과 바꿔 넣으십시오.",
+    ".pps": "PowerPoint에서 열어 .pptx로 다시 저장하고, 원래 파일과 바꿔 넣으십시오.",
+    ".ppsx": "PowerPoint에서 열어 .pptx로 다시 저장하고, 원래 파일과 바꿔 넣으십시오.",
+    ".rtf": "Word에서 열어 .docx로 다시 저장하고, 원래 파일과 바꿔 넣으십시오.",
+    ".zip": "같은 위치에 압축을 풀고, 압축 파일은 원본 폴더에서 빼십시오.",
+    ".7z": "같은 위치에 압축을 풀고, 압축 파일은 원본 폴더에서 빼십시오.",
+    ".egg": "같은 위치에 압축을 풀고, 압축 파일은 원본 폴더에서 빼십시오.",
+    ".alz": "같은 위치에 압축을 풀고, 압축 파일은 원본 폴더에서 빼십시오.",
+    ".rar": "같은 위치에 압축을 풀고, 압축 파일은 원본 폴더에서 빼십시오.",
 }
 
 # 목록에서 아예 제외하는 시스템·임시 파일
 IGNORED_NAMES = {"thumbs.db", "desktop.ini", ".ds_store"}
 
 FAIL_HINTS = {
-    "ENCRYPTED": "암호가 걸린 문서입니다. 암호를 풀어 다시 저장하거나 --password로 변환하십시오.",
+    "ENCRYPTED": "암호가 걸린 문서입니다. 암호를 풀어 다시 저장하고, 원래 파일과 바꿔 넣으십시오.",
     "DRM_PROTECTED": "문서보안(DRM)이 걸려 있어 열 수 없습니다. 보안을 해제한 사본이 필요합니다.",
     "CORRUPTED": "파일이 손상되었습니다. 원본을 다시 받아야 합니다.",
     "EMPTY_INPUT": "빈 파일입니다.",
@@ -70,6 +71,10 @@ FAIL_HINTS = {
     "UNSUPPORTED_FORMAT": "확장자와 실제 형식이 다를 수 있습니다. 원본 프로그램에서 열어 확인하십시오.",
     "MISSING_DEPENDENCY": "kordoc 선택 의존성이 없습니다. README의 kordoc 설치 절을 확인하십시오.",
     "TIMEOUT": "변환 시간이 제한을 넘었습니다. 파일을 나누거나 --timeout을 늘리십시오.",
+    # 아래는 이 스크립트가 붙이는 코드다
+    "TOOL_MISSING": "변환 도구가 없습니다. convert.py --check로 확인하고 설치 스크립트를 실행하십시오.",
+    "PARSE_ERROR": "kordoc이 파일을 읽지 못했습니다. 원본 프로그램에서 열어 다시 저장해 보십시오.",
+    "OFFICECLI_ERROR": "OfficeCLI가 파일을 읽지 못했습니다. 원본 프로그램에서 열어 다시 저장해 보십시오.",
 }
 
 CSV_MAX_ROWS = 500
@@ -156,6 +161,46 @@ def write_json_atomic(path: Path, data) -> None:
 # 도구 탐색
 # ---------------------------------------------------------------------------
 
+def refresh_path() -> None:
+    """설치 스크립트가 방금 설치한 도구를 찾을 수 있도록 PATH를 보강한다.
+
+    이미 실행 중인 에이전트는 설치 전의 PATH를 물려받으므로, 새로 설치한 node·kordoc·officecli를 찾지 못한다.
+    Windows는 레지스트리의 PATH를 다시 읽고, 두 운영체제 모두 알려진 설치 폴더를 뒤에 덧붙인다.
+    """
+    dirs: list[str] = []
+    home = Path.home()
+    if WINDOWS:
+        try:
+            import winreg
+            for root, key in ((winreg.HKEY_LOCAL_MACHINE, r"SYSTEM\CurrentControlSet\Control\Session Manager\Environment"),
+                              (winreg.HKEY_CURRENT_USER, "Environment")):
+                try:
+                    with winreg.OpenKey(root, key) as k:
+                        dirs += os.path.expandvars(winreg.QueryValueEx(k, "Path")[0]).split(os.pathsep)
+                except OSError:
+                    pass
+        except ImportError:
+            pass
+        env = os.environ
+        dirs += [
+            str(Path(env.get("ProgramFiles", r"C:\Program Files")) / "nodejs"),
+            str(Path(env.get("APPDATA", home / "AppData/Roaming")) / "npm"),
+            str(Path(env.get("LOCALAPPDATA", home / "AppData/Local")) / "OfficeCLI"),
+        ]
+    else:
+        dirs += ["/opt/homebrew/bin", "/usr/local/bin", str(home / ".local/bin")]
+    current = os.environ.get("PATH", "").split(os.pathsep)
+    seen = {os.path.normcase(d) for d in current if d}
+    extra = []
+    for d in dirs:
+        d = d.strip()
+        if d and os.path.normcase(d) not in seen and Path(d).is_dir():
+            extra.append(d)
+            seen.add(os.path.normcase(d))
+    if extra:
+        os.environ["PATH"] = os.pathsep.join(current + extra)
+
+
 def find_kordoc() -> list[str] | None:
     """kordoc 실행 명령을 찾는다. Windows의 .cmd 래퍼를 피하려고 node로 cli.js를 직접 실행한다."""
     node = shutil.which("node")
@@ -203,6 +248,35 @@ def tool_versions(kordoc: list[str] | None, officecli: list[str] | None) -> dict
             info["officecli"] = run(officecli + ["--version"], 60, officecli_env()).stdout.strip()
         except (OSError, subprocess.TimeoutExpired):
             pass
+    return info
+
+
+VENV_PYTHON = ROOT / (".venv/Scripts/python.exe" if os.name == "nt" else ".venv/bin/python")
+# 사이트 빌드에 필요한 패키지. mkdocs-material이 pymdown-extensions 등 확장도 함께 설치한다
+SITE_PACKAGES = ("mkdocs", "mkdocs-material")
+
+
+def site_versions() -> dict:
+    """프로젝트 가상환경(.venv)의 Python·MkDocs·Material for MkDocs 버전을 확인한다.
+
+    이 스크립트는 시스템 파이썬으로 실행될 수도 있으므로 .venv의 파이썬을 따로 호출한다.
+    """
+    info = {"python": None, **{name: None for name in SITE_PACKAGES}}
+    if not VENV_PYTHON.exists():
+        return info
+    code = (
+        "import platform, importlib.metadata as m\n"
+        "print(platform.python_version())\n"
+        f"for n in {SITE_PACKAGES!r}:\n"
+        "    try: print(m.version(n))\n"
+        "    except m.PackageNotFoundError: print('')\n"
+    )
+    try:
+        lines = run([str(VENV_PYTHON), "-c", code], 60).stdout.splitlines()
+    except (OSError, subprocess.TimeoutExpired):
+        return info
+    for key, val in zip(info, lines):
+        info[key] = val.strip() or None
     return info
 
 
@@ -424,7 +498,8 @@ def convert_one(entry: dict, src: Path, out: Path, tools: dict, args) -> None:
             if size == 0:
                 entry["hint"] = "변환 결과가 비어 있습니다. 원본을 직접 확인하십시오."
             return
-    entry.update(status="failed", error_code=code, error=err, hint=FAIL_HINTS.get(code))
+    entry.update(status="failed", error_code=code, error=err,
+                 hint=FAIL_HINTS.get(code, "원본 프로그램에서 열리는지 확인하고, 다시 저장한 파일로 바꿔 넣으십시오."))
 
 
 def write_report(out: Path, manifest: dict, source: Path) -> dict:
@@ -470,13 +545,16 @@ def write_report(out: Path, manifest: dict, source: Path) -> dict:
 
 
 def cmd_check(tools: dict) -> int:
-    info = tool_versions(tools["kordoc"], tools["officecli"])
+    info = {**site_versions(), **tool_versions(tools["kordoc"], tools["officecli"])}
     ok = True
-    for name, link in (("node", "https://nodejs.org/"),
+    for name, link in (("python", "프로젝트 가상환경(.venv)"),
+                       ("mkdocs", "https://www.mkdocs.org/"),
+                       ("mkdocs-material", "https://squidfunk.github.io/mkdocs-material/"),
+                       ("node", "https://nodejs.org/"),
                        ("kordoc", "https://github.com/chrisryugj/kordoc"),
                        ("officecli", "https://github.com/iOfficeAI/OfficeCLI")):
         ver = info[name]
-        print(f"{name:10s} {ver or '없음'}" + ("" if ver else f"  → 설치 안내: {link}"))
+        print(f"{name:16s} {ver or '없음'}" + ("" if ver else f"  → 설치 안내: {link}"))
         ok = ok and bool(ver)
     if not ok:
         script = r"setup\setup-windows.cmd" if WINDOWS else "bash setup/setup-mac.sh"
@@ -499,6 +577,7 @@ def main() -> int:
     ap.add_argument("--timeout", type=int, default=600, help="파일 하나의 변환 제한 시간(초)")
     args = ap.parse_args()
 
+    refresh_path()
     tools = {"kordoc": find_kordoc(), "officecli": find_officecli()}
     if args.check:
         return cmd_check(tools)

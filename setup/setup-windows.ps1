@@ -2,7 +2,14 @@
 # 사용법: setup\setup-windows.cmd 를 더블클릭하거나, PowerShell에서
 #   powershell -NoProfile -ExecutionPolicy Bypass -File setup\setup-windows.ps1
 # 이미 설치된 프로그램은 건너뛰므로 여러 번 실행해도 안전하다.
+# -Pause: 끝날 때 Enter 입력을 기다린다(더블클릭한 창이 바로 닫히지 않도록 .cmd가 넘긴다).
+#         AI 에이전트가 실행할 때는 입력 대기로 멈추지 않도록 이 스위치를 넘기지 않는다.
+# 종료 코드: 0 성공, 1 실패, 3 사용자 조치 필요
+#   3이면 '[사용자 조치 필요]' 안내를 출력한다(UAC 승인처럼 AI 에이전트가 대신할 수 없는 일).
+#   사용자가 조치를 마치면 이 스크립트를 다시 실행해 이어서 진행한다.
 # 주의: 이 파일은 PowerShell 5.1이 한글을 읽을 수 있도록 UTF-8 BOM으로 저장한다.
+
+param([switch]$Pause)
 
 $ErrorActionPreference = 'Continue'
 $Root = Split-Path -Parent $PSScriptRoot
@@ -13,11 +20,31 @@ $KordocScripts = 'onnxruntime-node,protobufjs'
 function Step([string]$n, [string]$msg) { Write-Host ''; Write-Host "[$n] $msg" -ForegroundColor Cyan }
 function Ok([string]$msg) { Write-Host "  완료 $msg" -ForegroundColor Green }
 function Warn([string]$msg) { Write-Host "  주의 $msg" -ForegroundColor Yellow }
+function Wait-Close {
+    if ($Pause) { Write-Host ''; Read-Host 'Enter 키를 누르면 창을 닫습니다' | Out-Null }
+}
 function Fail([string]$msg) {
     Write-Host "  실패 $msg" -ForegroundColor Red
-    Write-Host ''
-    Read-Host 'Enter 키를 누르면 창을 닫습니다'
+    Wait-Close
     exit 1
+}
+# AI 에이전트가 대신할 수 없는 일을 안내하고 종료 코드 3으로 끝낸다
+function Need-User([string]$title, [string[]]$lines) {
+    Write-Host ''
+    Write-Host "[사용자 조치 필요] $title" -ForegroundColor Yellow
+    foreach ($line in $lines) { Write-Host "  $line" }
+    Write-Host '  → 끝나면 AI에게 "했어"라고 말하십시오. 이어서 진행합니다. (직접 실행했다면 이 스크립트를 다시 실행하십시오.)'
+    Wait-Close
+    exit 3
+}
+# winget 설치는 관리자 승인(UAC)이 필요하다. 승인되지 않아 설치되지 않았으면 사용자에게 맡긴다
+function Need-Admin-Install([string]$label, [string]$link) {
+    Need-User "$label 설치 승인 (사용자 계정 컨트롤)" @(
+        "$label 설치에는 관리자 승인이 필요합니다. 화면에 뜬 '사용자 계정 컨트롤' 창에서 '예'를 누르지 않았거나, 창이 작업 표시줄 뒤에 숨어 있었을 수 있습니다.",
+        "1. 관리자 권한이 있다면: AI에게 '했어'라고 말한 뒤, 다시 뜨는 '사용자 계정 컨트롤' 창에서 '예'를 누르십시오(작업 표시줄의 방패 아이콘을 확인).",
+        "2. 회사 PC라 관리자 권한이 없다면: IT 담당자에게 $label 설치를 요청하고, 설치가 끝나면 AI에게 '했어'라고 말하십시오.",
+        "3. 직접 설치해도 됩니다: $link"
+    )
 }
 function Has([string]$cmd) { return [bool](Get-Command $cmd -ErrorAction SilentlyContinue) }
 function Refresh-Path {
@@ -31,11 +58,6 @@ function Winget-Install([string]$id, [string]$label) {
     winget install -e --id $id --accept-source-agreements --accept-package-agreements
     Refresh-Path
 }
-function Python-Ok {
-    if (-not (Has 'py')) { return $false }
-    & py -3 -c "import sys; sys.exit(0 if sys.version_info >= (3, 10) else 1)" 2>$null
-    return ($LASTEXITCODE -eq 0)
-}
 function Node-Ok {
     if (-not (Has 'node')) { return $false }
     & node -e "process.exit(+process.versions.node.split('.')[0] >= 20 ? 0 : 1)" 2>$null
@@ -48,27 +70,25 @@ Refresh-Path
 # ---------------------------------------------------------------------------
 Step '1/8' 'winget (Windows 패키지 관리자)'
 if (-not (Has 'winget')) {
-    Warn 'winget이 없습니다. Microsoft Store에서 "앱 설치 관리자(App Installer)"를 설치하거나 업데이트한 뒤 다시 실행하십시오.'
     Start-Process 'ms-windows-store://pdp/?productid=9NBLGGH4NNS1' -ErrorAction SilentlyContinue
-    Fail 'winget을 찾을 수 없습니다. README.md의 수동 설치 안내를 따라도 됩니다.'
+    Need-User '앱 설치 관리자(winget) 설치' @(
+        '1. 방금 열린 Microsoft Store의 "앱 설치 관리자(App Installer)" 페이지에서 "설치" 또는 "업데이트"를 누르십시오.',
+        '   페이지가 열리지 않았다면 Microsoft Store에서 "앱 설치 관리자"를 검색하십시오.',
+        '2. Microsoft Store를 쓸 수 없는 회사 PC라면 IT 담당자에게 Git과 Node.js LTS 설치를 요청하십시오.'
+    )
 }
 Ok "winget $(winget --version)"
 
 # ---------------------------------------------------------------------------
-Step '2/8' 'Git · Python · Node.js'
+Step '2/8' 'Git · Node.js'
 if (Has 'git') { Ok "$(git --version)" } else {
     Winget-Install 'Git.Git' 'Git'
-    if (Has 'git') { Ok "$(git --version)" } else { Fail 'Git을 찾을 수 없습니다. 창을 닫고 스크립트를 다시 실행하십시오.' }
-}
-
-if (Python-Ok) { Ok "$(py -3 --version)" } else {
-    Winget-Install 'Python.Python.3.12' 'Python 3.12'
-    if (Python-Ok) { Ok "$(py -3 --version)" } else { Fail 'Python 3.10 이상을 찾을 수 없습니다. 창을 닫고 스크립트를 다시 실행하십시오.' }
+    if (Has 'git') { Ok "$(git --version)" } else { Need-Admin-Install 'Git' 'https://git-scm.com/download/win' }
 }
 
 if (Node-Ok) { Ok "Node.js $(node --version)" } else {
     Winget-Install 'OpenJS.NodeJS.LTS' 'Node.js LTS'
-    if (Node-Ok) { Ok "Node.js $(node --version)" } else { Fail 'Node.js 20 이상을 찾을 수 없습니다. 창을 닫고 스크립트를 다시 실행하십시오.' }
+    if (Node-Ok) { Ok "Node.js $(node --version)" } else { Need-Admin-Install 'Node.js LTS' 'https://nodejs.org/ (LTS 버전)' }
 }
 
 # ---------------------------------------------------------------------------
@@ -117,16 +137,13 @@ if ($long -eq 1) { Ok 'Windows 긴 경로가 이미 허용되어 있습니다.' 
 }
 
 # ---------------------------------------------------------------------------
-Step '7/8' '파이썬 가상환경과 MkDocs · 다이어그램 도구'
+Step '7/8' 'Python 가상환경과 MkDocs · Material for MkDocs · 다이어그램 도구'
+# 사이트 실행 스크립트가 Python 준비(없으면 uv로 내려받기, UAC 불필요)·.venv 점검·Material 설치를 맡는다
 $venvPy = Join-Path $Root '.venv\Scripts\python.exe'
-if (-not (Test-Path -LiteralPath $venvPy)) {
-    & py -3 -m venv .venv
-    if (-not (Test-Path -LiteralPath $venvPy)) { Fail '가상환경(.venv)을 만들지 못했습니다.' }
-}
-& $venvPy -m pip install -q --upgrade pip
-& $venvPy -m pip install -q -r mkdocs\requirements.txt
-if ($LASTEXITCODE -ne 0) { Fail 'MkDocs 설치에 실패했습니다.' }
-Ok "$(& (Join-Path $Root '.venv\Scripts\mkdocs.exe') --version)"
+& powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot 'serve-windows.ps1') -Prepare
+$code = $LASTEXITCODE
+if ($code -eq 3) { Wait-Close; exit 3 }
+if ($code -ne 0) { Fail '사이트 도구를 준비하지 못했습니다. 위의 메시지를 확인하십시오.' }
 
 $mermaid = Join-Path $Root '.agents\skills\pretty-mermaid'
 if (Test-Path -LiteralPath (Join-Path $mermaid 'node_modules')) { Ok 'pretty-mermaid 이미 설치됨' } else {
@@ -145,11 +162,10 @@ if ($LASTEXITCODE -eq 0) {
     Write-Host '설치가 끝났습니다.' -ForegroundColor Green
     Write-Host '다음 순서로 사용하십시오.'
     Write-Host '  1. 열려 있는 PowerShell·터미널 창을 모두 닫고 새로 엽니다(설치한 프로그램의 경로를 반영하기 위해).'
-    Write-Host "  2. 받은 자료를 '1. 인수인계 자료 원본' 폴더에 넣습니다."
+    Write-Host "  2. 받은 자료를 '1. RAW' 폴더에 넣습니다."
     Write-Host "  3. 프로젝트 폴더에서 AI 에이전트를 실행하고 '자료를 모두 변환해서 사이트에 등록해줘'라고 요청합니다."
-    Write-Host '  4. 사이트 보기: .venv\Scripts\mkdocs serve -f mkdocs\mkdocs.yml  →  http://127.0.0.1:8000'
-    Write-Host ''
-    Read-Host 'Enter 키를 누르면 창을 닫습니다'
+    Write-Host "  4. 사이트 보기: AI 에이전트에게 '업무노트 실행해줘'라고 요청하거나 setup\serve-windows.ps1 실행  →  http://127.0.0.1:8000"
+    Wait-Close
 } else {
     Fail '확인에 실패한 도구가 있습니다. 창을 닫고 이 스크립트를 한 번 더 실행하십시오.'
 }

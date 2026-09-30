@@ -12,11 +12,14 @@ description: |
 
 # Pretty Mermaid
 
-## 이 프로젝트에서의 사용 (my_work_mkdocs)
+## 이 프로젝트에서의 사용
+
+이 절은 아래 영문 원본 설명보다 우선합니다. 이 프로젝트에서 이 스킬은 **사이트 문서에 넣을 Mermaid 도표를 미리 렌더링해 확인하는 용도**로만 씁니다. 렌더링한 SVG·PNG는 문서에 넣지 않고, 문서에는 ` ```mermaid ` 원문을 넣습니다.
 
 - 출처: https://github.com/imxv/Pretty-mermaid-skills (MIT, 커밋 `e234ab7`). 테마 갤러리, README, 문서 검증 스크립트는 복사하지 않았습니다.
-- 사이트(`mkdocs/docs/`)의 ` ```mermaid ` 블록은 브라우저에서 같은 렌더러(`beautiful-mermaid@1.1.3`)로 그려집니다. 구현은 `mkdocs/docs/javascripts/pretty-mermaid.js`에 있으며, 색은 사이트 디자인 토큰(`--kb-*`)을 따르므로 문서에 테마를 지정하지 않습니다.
-- 문서에 다이어그램을 추가·수정할 때는 원문을 `.mmd`로 스크래치 폴더에 저장하고 아래처럼 PNG로 미리 렌더링해서 배치와 라벨을 눈으로 확인합니다. 작성 규칙은 `.agents/skills/mkdocs-writing-guide/SKILL.md`의 5.3절을 따릅니다.
+- 사이트(`mkdocs/docs/`)의 ` ```mermaid ` 블록은 브라우저에서 같은 렌더러(`beautiful-mermaid@1.1.3`)로 그려집니다. 구현은 `mkdocs/docs/javascripts/pretty-mermaid.js`에 있으며, 색은 사이트 디자인 토큰(`--kb-*`)을 따르므로 문서에 테마를 지정하지 않습니다. 아래 `--theme zinc-light`는 미리 보기용입니다.
+- 사이트 렌더러가 지원하는 유형은 아래 `Choose a diagram type` 표의 여섯 가지입니다. 그 밖의 유형은 사이트에서 Material 기본 mermaid로 대신 그려지므로 이 CLI로는 미리 볼 수 없습니다.
+- 문서에 다이어그램을 추가·수정할 때는 원문을 `.mmd`로 스크래치 폴더에 저장하고, 프로젝트 루트에서 아래처럼 PNG로 미리 렌더링해 배치와 라벨을 눈으로 확인합니다. 작성 규칙은 `.agents/skills/mkdocs-writing-guide/SKILL.md`의 5.3절을 따릅니다.
 
 ```bash
 node .agents/skills/pretty-mermaid/scripts/render.mjs \
@@ -24,7 +27,7 @@ node .agents/skills/pretty-mermaid/scripts/render.mjs \
   --format png --width 1400 --theme zinc-light
 ```
 
-- 최초 실행 전에 `.agents/skills/pretty-mermaid`에서 `npm install`을 실행합니다(`node_modules/`는 커밋하지 않습니다).
+- 의존성은 설치 스크립트가 설치합니다. `node_modules`가 없으면 `.agents/skills/pretty-mermaid`에서 `npm install`을 실행합니다(`node_modules/`는 커밋하지 않습니다).
 
 
 Create or render Mermaid diagrams with the bundled Node.js CLI. Use SVG for scalable documentation, PNG for sharing or raster-only consumers, and ASCII or Unicode for terminals and plain text.
