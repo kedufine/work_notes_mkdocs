@@ -1,0 +1,4 @@
+# 지식저장소 문서 사이트 빌드 의존성
+# 로컬: python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+mkdocs==1.6.1
+mkdocs-material==9.7.7

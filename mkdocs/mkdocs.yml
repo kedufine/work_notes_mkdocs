@@ -1,0 +1,153 @@
+## ---------------------------------------------------------------------------
+## 사이트 정보
+## ---------------------------------------------------------------------------
+site_name: kwonsu의 업무노트
+site_description: 업무 지식 아카이브
+site_author: kwonsu kim
+
+copyright: 'Copyright &copy; 2026 kwonsu의 업무노트. All rights reserved.'
+
+## ---------------------------------------------------------------------------
+## 테마
+## ---------------------------------------------------------------------------
+theme:
+  name: material
+  custom_dir: overrides
+  language: ko
+
+  # Material 기본 Roboto(Google Fonts) 로딩을 끈다.
+  # 폰트는 extra_css의 Pretendard로 일원화 — 불필요한 네트워크 왕복과 FOUT 제거.
+  font: false
+
+  # overrides/.icons/custom/logo.svg 를 인라인 SVG로 삽입 → currentColor 동작
+  icon:
+    logo: custom/logo
+  favicon: assets/favicon.svg
+
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: white
+      accent: black
+      toggle:
+        icon: material/weather-night
+        name: 다크 모드로 전환
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: black
+      accent: white
+      toggle:
+        icon: material/weather-sunny
+        name: 라이트 모드로 전환
+
+  features:
+    # 네비게이션
+    - navigation.tabs           # 상단 탭바 (대분류)
+    - navigation.tabs.sticky    # 스크롤해도 탭바 고정
+    - navigation.sections       # 사이드바 2단계를 굵은 섹션 라벨로
+    - navigation.indexes        # 섹션의 index.md를 섹션 자체 링크로
+    - navigation.tracking       # 스크롤에 따라 URL 앵커 갱신
+    - navigation.top            # 맨 위로 버튼
+    - navigation.footer         # 이전/다음 문서 링크
+    - navigation.instant        # SPA 방식 페이지 전환
+    - navigation.instant.progress
+    # 목차
+    - toc.follow                # 스크롤에 따라 우측 TOC 자동 추적
+    # 검색
+    - search.highlight
+    - search.share
+    # 콘텐츠
+    - content.code.copy         # 코드블록 복사 버튼
+    - content.code.annotate
+    - content.tooltips
+
+## ---------------------------------------------------------------------------
+## 스타일
+## ---------------------------------------------------------------------------
+extra_css:
+  # Pretendard Variable — 동적 서브셋(unicode-range 분할)이라 필요한 글자만 내려받음
+  - https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css
+  - stylesheets/extra.css
+
+extra_javascript:
+  - javascripts/pretty-mermaid.js
+
+extra:
+  # Material 하단 "Made with Material for MkDocs" 문구 유지 여부
+  generator: false
+  social: []
+
+## ---------------------------------------------------------------------------
+## 플러그인
+## ---------------------------------------------------------------------------
+plugins:
+  - search:
+      lang:
+        - ko
+        - en
+      # 한글 검색 튜닝.
+      # 기본 구분자(공백/문장부호)에 더해 한글↔영숫자 경계에서도 토큰을 분리한다.
+      # 예) "API문서" → "API" + "문서" 로 각각 검색 가능.
+      # 주의: lunr에는 한글 형태소 분석기가 없어 조사가 붙은 검색어("문서를")는
+      #       원형("문서")과 완전히 매칭되지 않는다. 완화일 뿐 완전 해결은 아니다.
+      separator: '[\s​\-_,:!=\[\]()"`/]+|\.(?!\d)|&[lg]t;|(?!\b)(?=[A-Z][a-z])|(?<=[가-힣])(?=[A-Za-z0-9])|(?<=[A-Za-z0-9])(?=[가-힣])'
+
+## ---------------------------------------------------------------------------
+## 마크다운 확장
+## ---------------------------------------------------------------------------
+markdown_extensions:
+  # 기본
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+      permalink_title: 이 위치로 이동
+      toc_depth: 3
+      # Python-Markdown 기본 slugify는 non-ASCII를 버려서 한글 제목의 id가
+      # "_1", "_2" 로 뭉개진다. 유니코드를 보존하는 pymdownx 버전을 쓴다.
+      slugify: !!python/object/apply:pymdownx.slugs.slugify
+        kwds:
+          case: lower
+
+  # PyMdown
+  - pymdownx.betterem
+  - pymdownx.caret
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.superfences:
+      custom_fences:
+        # ```mermaid 는 Pretty Mermaid(beautiful-mermaid)로 렌더링한다.
+        # Material 기본 렌더러(pre.mermaid)와 겹치지 않도록 별도 클래스의 div 로 내보낸다.
+        - name: mermaid
+          class: pretty-mermaid
+          format: !!python/name:pymdownx.superfences.fence_div_format
+  - pymdownx.tabbed:
+      alternate_style: true
+      slugify: !!python/object/apply:pymdownx.slugs.slugify
+        kwds:
+          case: lower
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+
+## ---------------------------------------------------------------------------
+## 목차 구조
+## ---------------------------------------------------------------------------
+nav:
+  - 홈: index.md
+

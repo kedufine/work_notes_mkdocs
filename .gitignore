@@ -1,0 +1,14 @@
+# macOS
+.DS_Store
+
+# Python & Virtualenv
+.venv/
+__pycache__/
+*.pyc
+
+# MkDocs Build Artifacts
+/site/
+mkdocs/site/
+
+# Node (pretty-mermaid 스킬 의존성)
+node_modules/
