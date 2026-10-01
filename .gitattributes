@@ -2,3 +2,6 @@
 *.sh  text eol=lf
 *.ps1 text eol=crlf
 *.cmd text eol=crlf
+
+# 서드파티 라이선스 원문은 바이트 단위로 그대로 유지
+LICENSES/* text eol=lf

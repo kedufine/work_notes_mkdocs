@@ -34,6 +34,7 @@ flowchart LR
 | `mkdocs/docs/handover/` | AI 에이전트가 주제별로 정리한 문서입니다. 사이트에 표시됩니다. |
 | `mkdocs/mkdocs.yml` | 사이트 설정과 메뉴(`nav`)입니다. |
 | `setup/` | Windows·macOS 설치 스크립트입니다. |
+| `LICENSES/` | 서드파티 소프트웨어의 라이선스 전문입니다. Material for MkDocs(MIT)의 저작권 표기와 라이선스 전문이 있으며, 사이트를 빌드할 때 함께 복사되어 사이트 하단의 `MIT License` 링크로 볼 수 있습니다. Material을 업그레이드해 원문이 바뀌면 빌드가 실패하므로, `.venv` 안 `mkdocs_material-*.dist-info/licenses/LICENSE`로 교체합니다. |
 | `.agents/skills/` | AI 에이전트가 따르는 작업 절차(스킬)입니다. |
 | `AGENTS.md`, `CLAUDE.md` | AI 에이전트에게 주는 프로젝트 지침입니다. |
 

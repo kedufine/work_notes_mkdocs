@@ -1215,6 +1215,17 @@ body {
   font-weight: 500;
 }
 
+/* 서드파티 라이선스 표기 (overrides/partials/copyright.html) */
+.md-copyright__licenses a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.md-copyright__licenses a:hover {
+  color: var(--kb-text-strong);
+}
+
 /* 맨 위로 버튼 */
 .md-top {
   background-color: var(--kb-bg);

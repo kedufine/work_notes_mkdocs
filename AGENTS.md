@@ -11,6 +11,7 @@
 | `mkdocs/docs/handover/` | 정리된 인수인계 문서. 개요 페이지는 `handover/index.md`. |
 | `mkdocs/docs/index.md` | 사이트 홈. 요약 표와 최근 업데이트 표가 있다. |
 | `mkdocs/mkdocs.yml` | 사이트 설정과 `nav`. |
+| `LICENSES/` | 사용 중인 서드파티 소프트웨어의 라이선스 전문(현재 Material for MkDocs). 원문을 그대로 두며, 빌드할 때 `mkdocs/hooks/licenses.py`가 사이트에 복사한다. |
 | `setup/` | 전체 설치 스크립트(`setup-mac.sh`, `setup-windows.ps1`)와 사이트 실행 스크립트(`serve-mac.sh`, `serve-windows.ps1`). |
 
 원본과 중간본은 `.gitignore`로 제외한다.
