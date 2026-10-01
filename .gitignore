@@ -1,10 +1,18 @@
-# macOS
+# OS generated files
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+[Dd]esktop.ini
 
 # Python & Virtualenv
 .venv/
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
 
 # MkDocs Build Artifacts
 /site/
@@ -12,9 +20,12 @@ mkdocs/site/
 
 # Node (pretty-mermaid 스킬 의존성)
 node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
 # 인수인계 자료 원본과 변환 중간본 (개인정보 포함, 저장소에 올리지 않음)
-# 폴더 자리는 .gitkeep으로 유지한다
+# 원본 폴더 자리는 .gitkeep으로 유지한다
 /1. RAW/*
 !/1. RAW/.gitkeep
 /2. 변환 중간본/
