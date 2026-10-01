@@ -41,12 +41,11 @@
 - 문서를 추가·수정하면 `nav` 등록, 홈(`mkdocs/docs/index.md`) 최근 업데이트 갱신, 빌드 검증까지 마친다. 빌드 검증 명령은 다음과 같다. 통과 기준은 `mkdocs-writing-guide` 6절을 따른다.
     - macOS: `.venv/bin/mkdocs build --strict -f mkdocs/mkdocs.yml`
     - Windows: `.venv/Scripts/mkdocs build --strict -f mkdocs/mkdocs.yml`
-- 사용자가 "실행해줘", "업무노트 실행해줘", "mkdocs 실행해줘" 등을 요청하면, 사용자가 아무것도 하지 않아도 사이트가 열리도록 다음 순서로 진행한다. 필요한 프로그램이 없으면 확인을 묻지 말고 "필요한 프로그램을 자동으로 설치합니다"라고만 알린 뒤 설치한다.
-    1. **준비** (포그라운드, 제한 시간 10분): 사이트에 필요한 Python·MkDocs·Material for MkDocs를 확인하고 없으면 설치한다. 관리자 권한 없이 설치하므로 암호 입력이나 UAC 창이 뜨지 않는다.
-        - macOS: `bash setup/serve-mac.sh --prepare`
-        - Windows: `powershell -NoProfile -ExecutionPolicy Bypass -File setup/serve-windows.ps1 -Prepare`
-    2. **실행** (백그라운드): 같은 스크립트를 옵션 없이 실행한다(macOS `bash setup/serve-mac.sh`, Windows `powershell -NoProfile -ExecutionPolicy Bypass -File setup/serve-windows.ps1`). 출력에 `Serving on`이 나오거나 <http://127.0.0.1:8000>이 응답하면 주소를 안내한다. `이미 8000 포트에서 실행 중입니다`가 나오면 새로 띄우지 않고 기존 주소를 안내한다.
-    3. 종료 코드가 3이면 아래 "사용자 조치 절차"를 따른다.
+- 사용자가 "실행해줘", "업무노트 실행해줘", "mkdocs 실행해줘" 등을 요청하면, 사용자가 아무것도 하지 않아도 사이트가 열리도록 아래 명령 하나만 백그라운드로 실행한다. 필요한 프로그램이 없으면 확인을 묻지 말고 "필요한 프로그램을 자동으로 설치합니다"라고만 알린 뒤 실행한다. 스크립트가 스스로 필요한 프로그램을 확인하고 설치한 뒤 사이트를 띄우므로 처음 실행 시에는 최대 10분까지 기다릴 수 있다.
+    - macOS: `bash setup/serve-mac.sh`
+    - Windows: `powershell -NoProfile -ExecutionPolicy Bypass -File setup\serve-windows.ps1` (반드시 PowerShell에서 실행한다. `\`가 쓰이므로 Git Bash에서 실행하면 `\`가 사라져 경로가 깨지기 때문이다.)
+    - 출력에 `Serving on`이 나오거나 <http://127.0.0.1:8000>이 응답하면 주소를 안내한다. `이미 8000 포트에서 실행 중입니다`가 나오면 새로 띄우지 않고 기존 주소를 안내한다.
+    - 종료 코드가 3이면 아래 "사용자 조치 절차"를 따른다.
 
 ## 사용자 조치 절차
 
