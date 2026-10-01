@@ -47,7 +47,7 @@ net_or_fail() {
 }
 
 python_ok() { "$1" -c 'import sys; sys.exit(0 if sys.version_info >= (3, 10) else 1)' >/dev/null 2>&1; }
-site_ok()   { "$VENV_PY" -c 'import mkdocs, material' >/dev/null 2>&1; }
+site_ok()   { "$VENV_PY" -c 'import mkdocs, material, mkdocs_charts_plugin' >/dev/null 2>&1; }
 
 # 설치 없이 쓸 수 있는 Python 3.10 이상을 찾는다
 find_python() {

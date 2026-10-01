@@ -61,7 +61,7 @@ function Python-Ok([string]$exe, [string[]]$pre) {
 
 function Site-Ok {
     if (-not (Test-Path -LiteralPath $VenvPy)) { return $false }
-    & $VenvPy -c "import mkdocs, material" 2>$null
+    & $VenvPy -c "import mkdocs, material, mkdocs_charts_plugin" 2>$null
     return ($LASTEXITCODE -eq 0)
 }
 
