@@ -1,20 +1,35 @@
 # 프로젝트 지침
 
-전임자의 인수인계 자료(HWP·HWPX·PDF·DOCX·XLSX·XLS·PPTX·이미지 등)를 읽어 마크다운으로 변환하고, MkDocs 사이트에 업무 주제별로 등록하는 프로젝트입니다.
+전임자(인계자)의 인수인계 자료(HWP·HWPX·PDF·DOCX·XLSX·XLS·PPTX·이미지 등)를 읽어, 인수자가 이해하기 쉬운 하나의 문서로 재구성해 MkDocs 사이트에 등록한 뒤, 자료에서 부족한 부분을 인계자에게 질문지로 물어 그 답변으로 문서를 보강하는 프로젝트입니다.
+
+## 처리 과정
+
+| 단계 | 하는 일 | 수행 주체 | 산출물 |
+| :--- | :--- | :--- | :--- |
+| 1단계 변환 | `1. RAW/`의 원본을 마크다운 중간본으로 일괄 변환한다. | 에이전트 | `2. 변환 중간본/` |
+| 2단계 등록 | 중간본의 내용을 생략 없이, 인수자가 읽기 쉬운 새 골격으로 재구성해 인수인계 건마다 하나의 통합 문서로 등록한다. | 에이전트 | `mkdocs/docs/handover/<건별-슬러그>/index.md` |
+| 3단계 질문지 작성 | 인수자가 궁금해할 사항과 세부 정보가 부족한 사항을 뽑아 엑셀 질문지를 만든다. | 에이전트 | `3. 업무인수인계 질문지/YYMMDD <인계자명> 업무인계인수 질문지.xlsx` |
+| 전달·회신 | 질문지를 인계자에게 전달하고, 답변이 적힌 파일을 받아 `3. 업무인수인계 질문지/`에 넣는다. | 사용자(인수자) | 답변이 적힌 `.xlsx` |
+| 4단계 답변 반영 | 회신받은 답변으로 2단계에서 등록한 통합 문서를 보강한다. | 에이전트 | 보강된 `mkdocs/docs/handover/<건별-슬러그>/index.md` |
+
+- 사용자가 자료의 변환·등록을 요청하면 **1단계부터 3단계까지 이어서 수행**한다. 질문지를 만들지 여부를 묻지 않으며, 질문지를 만든 뒤에는 인계자에게 전달하도록 안내하고 멈춘다. 이미 등록된 건에 자료가 추가된 경우에는 문서만 갱신하고, 새로 생긴 의문점을 보고한 뒤 사용자가 요청하면 추가 질문지를 만든다.
+- 사용자가 "질문지 답변 왔어", "회신 받았어", "답변 반영해줘" 등으로 알리면 4단계를 수행한다.
+- 사용자가 "질문지 만들어줘"처럼 3단계만 요청했는데 2단계가 끝나지 않았다면, 1·2단계를 먼저 수행한다.
 
 ## 폴더
 
 | 경로 | 역할 |
 | :--- | :--- |
 | `1. RAW/` | 인수인계 자료 원본. 사용자가 받은 자료를 그대로 넣는 곳. **읽기만 하고 수정·이동·삭제하지 않는다.** |
-| `2. 변환 중간본/` | 변환 스크립트 산출물(`manifest.json`, `변환 보고서.md`, 파일별 마크다운, `images/`). 다시 만들 수 있다. |
-| `mkdocs/docs/handover/` | 정리된 인수인계 문서. 개요 페이지는 `handover/index.md`. |
+| `2. 변환 중간본/` | 변환 스크립트 산출물(`manifest.json`, `변환 보고서.md`, 파일별 마크다운, `images/`)과 질문지 작업용 JSON(`질문지/`). 스크립트가 다시 만들 때 덮어쓰므로 파일별 마크다운은 직접 고치지 않는다. |
+| `3. 업무인수인계 질문지/` | 인계자에게 보내는 엑셀 질문지와 인계자가 회신한 파일. 파일명은 `YYMMDD <인계자명> 업무인계인수 질문지.xlsx`(예: `261012 조호재 업무인계인수 질문지.xlsx`). **새 질문지를 만들기만 하고, 이미 있는 파일은 수정·이동·삭제하지 않는다.** |
+| `mkdocs/docs/handover/` | 재구성한 인수인계 문서. 마스터 허브는 `handover/index.md`, 건별 통합 문서는 `handover/<건별-슬러그>/index.md`(건마다 하나). |
 | `mkdocs/docs/index.md` | 사이트 홈. 요약 표와 최근 업데이트 표가 있다. |
 | `mkdocs/mkdocs.yml` | 사이트 설정과 `nav`. |
 | `LICENSES/` | 사용 중인 서드파티 소프트웨어의 라이선스 전문(현재 Material for MkDocs). 원문을 그대로 두며, 빌드할 때 `mkdocs/hooks/licenses.py`가 사이트에 복사한다. |
 | `setup/` | 전체 설치 스크립트(`setup-mac.sh`, `setup-windows.ps1`)와 사이트 실행 스크립트(`serve-mac.sh`, `serve-windows.ps1`). |
 
-원본과 중간본은 `.gitignore`로 제외한다.
+원본, 중간본, 질문지는 `.gitignore`로 제외한다.
 
 ## 작업별 스킬
 
@@ -22,28 +37,35 @@
 
 | 작업 | 스킬 |
 | :--- | :--- |
-| 인수인계 원본 자료 변환·등록, 자료 추가·수정·삭제 반영 | `.agents/skills/handover-to-mkdocs/SKILL.md` |
+| 인수인계 원본 자료 변환·등록(1·2단계), 자료 추가·수정·삭제 반영 | `.agents/skills/handover-to-mkdocs/SKILL.md` |
+| 인계자에게 보낼 질문지 작성(3단계), 회신받은 답변으로 문서 보강(4단계) | `.agents/skills/handover-questionnaire/SKILL.md` |
 | `mkdocs/docs/` 아래 `.md` 문서 작성·수정 | `.agents/skills/mkdocs-writing-guide/SKILL.md` |
 | Mermaid 다이어그램 추가·수정 전 미리 렌더링 | `.agents/skills/pretty-mermaid/SKILL.md` (작성 규칙은 `mkdocs-writing-guide` 5.3절) |
 
-인수인계 자료를 변환·등록할 때는 `handover-to-mkdocs`와 `mkdocs-writing-guide`를 함께 읽는다.
+인수인계 자료를 변환·등록할 때는 `handover-to-mkdocs`, `handover-questionnaire`, `mkdocs-writing-guide`를 함께 읽는다. 질문지 답변을 반영할 때는 `handover-questionnaire`와 `mkdocs-writing-guide`를 함께 읽는다.
 
 ## 필수 규칙
 
 - 파일 읽기는 kordoc(HWP·HWPX·PDF·DOCX·XLS(X)·이미지)과 OfficeCLI(PPTX)를 사용한다. 원본을 하나씩 따로 열지 말고 `handover-to-mkdocs`의 변환 스크립트로 일괄 변환한다.
 - 사용자 PC에는 파이썬을 포함해 **아무 프로그램도 설치되어 있지 않을 수 있다**고 가정한다. 사이트는 프로젝트의 `.venv`에 설치된 Python, MkDocs, Material for MkDocs(`mkdocs-material`, 버전은 `mkdocs/requirements.txt`)가 있어야 동작하고, 변환은 Node.js, kordoc, OfficeCLI가 필요하다. 작업 전에 `convert.py --check`로 여섯 항목을 확인한다(절차는 `handover-to-mkdocs` 2절).
 - 도구가 없으면 사용자에게 알린 뒤 설치 스크립트(`setup/setup-mac.sh`, `setup/setup-windows.ps1`)를 실행한다. 설치 스크립트는 Python과 Material for MkDocs까지 설치한다. 종료 코드 3이면 아래 "사용자 조치 절차"를 따르고, 종료 코드 1로 실패하면 `README.md` 2절의 수동 설치를 따른다. 원문 안내는 <https://github.com/chrisryugj/kordoc>, <https://github.com/iOfficeAI/OfficeCLI>이다.
-- 변환 문서의 본문은 원문을 요약하지 않고 옮긴다. 에이전트가 쓰는 부분은 `요약`과 `인수인계 확인 사항`뿐이다.
-- 이 사이트는 사용자 본인만 로컬에서 본다. 연락처 등 개인정보를 가리지 않고 원문 그대로 옮긴다.
-- 변환된 모든 원본(`converted`·`empty`)이 어떤 문서에 반영되었는지 `manifest.json`의 `published`로 추적한다. 변환하지 못한 원본은 `handover/index.md`의 대응표에 상태와 조치 방법을 적는다.
-- Windows에서 명령을 실행할 때도 경로는 `/`로 적는다(예: `.venv/Scripts/mkdocs`, `setup/serve-windows.ps1`). 에이전트의 셸이 Git Bash이면 `\`가 이스케이프 문자로 처리되어 경로가 깨지고, PowerShell은 `/`도 경로로 인식한다.
+- **인수인계 문서는 건마다 md 하나로 쓴다.** 원본 파일별·주제별로 문서를 나누지 않고 `handover/<건별-슬러그>/index.md` 하나에 모은다.
+- **원본을 그대로 옮기지 않고, 요약하지도 않는다.** 원본의 내용을 하나도 생략하지 않으면서, 인수자가 읽고 바로 이해할 수 있도록 새로운 골격(`mkdocs-writing-guide` 4.2절)으로 재구성한다. 줄어드는 것은 여러 파일에 똑같이 반복된 내용뿐이다.
+- **가독성을 최우선으로 한다.** 업무 단위로 묶고, 목록·비교·연락처·일정은 표, 절차와 흐름은 Mermaid 다이어그램, 수치의 추이와 비교는 Vega-Lite 차트로 표현한다.
+- **사실은 바꾸지 않는다.** 수치·날짜·이름·연락처·계정·경로는 원문의 값 그대로 옮기고, 자료에 없는 내용은 인계자의 답변이 돌아오기 전까지 추측으로 채우지 않으며(`확인 필요`로 표시), 절마다 출처를 적는다. 실행할 SQL·스크립트와 문구가 중요한 공문은 접이식 블록에 전문을 둔다. 사이트는 사용자 본인만 로컬에서 보므로 연락처 등 개인정보도 가리지 않는다(상세는 `handover-to-mkdocs` 4.2·4.3절).
+- 질문지는 `handover-questionnaire`의 스크립트(`questionnaire.py build`)로 만들고, 회신 파일은 같은 스크립트(`questionnaire.py read`)로 읽는다. 이 스크립트는 표준 라이브러리만 사용하므로 추가로 설치할 프로그램이 없다.
+- 질문지에는 자료에서 답을 찾을 수 없는 사항만 넣는다.
+- 인계자의 답변은 내용을 생략하지 않고 통합 문서의 해당 절에 녹여 넣으며, 반영한 부분에 `질문지 YYMMDD · Q-NNN` 출처를 붙인다. 질문과 답변의 원문은 `## 인계자 보충 답변` 섹션에 고치지 않고 남긴다(상세는 `handover-questionnaire` 3절).
+- 해당 건의 모든 원본을 통합 문서의 `원본 파일 대응표`에 적는다. 반영한 원본은 `manifest.json`의 `published`에도 기록하고, 변환하지 못해 반영하지 못한 원본은 대응표에 상태와 조치 방법을 적는다.
+- Windows에서 에이전트가 명령을 실행할 때도 경로는 `/`로 적는다(예: `.venv/Scripts/mkdocs`, `setup/serve-windows.ps1`). 에이전트의 셸이 Git Bash이면 `\`가 이스케이프 문자로 처리되어 경로가 깨지고, PowerShell은 `/`도 경로로 인식하므로 `/`는 두 셸에서 모두 동작한다.
 - 설치 스크립트가 Node.js·kordoc·OfficeCLI를 설치한 직후에는 에이전트 셸의 PATH가 갱신되지 않아 `node`, `npm`을 찾지 못할 수 있다. `convert.py`는 알려진 설치 경로를 스스로 찾으므로 그대로 실행하면 되고, 에이전트가 직접 `node`·`npm`을 실행해야 하면 전체 경로(macOS `/opt/homebrew/bin/node`, Windows `"C:/Program Files/nodejs/node.exe"`)를 사용한다. 이를 이유로 사용자에게 에이전트를 다시 시작하라고 요청하지 않는다.
-- 문서를 추가·수정하면 `nav` 등록, 홈(`mkdocs/docs/index.md`) 최근 업데이트 갱신, 빌드 검증까지 마친다. 빌드 검증 명령은 다음과 같다. 통과 기준은 `mkdocs-writing-guide` 6절을 따른다.
+- 인수인계 건의 진행 상태를 마스터 허브(`handover/index.md`)의 `상태`와 통합 문서의 `질문지 현황`에 기록한다(상태 값은 `handover-to-mkdocs` 4.6절).
+- 문서를 추가·수정하면 `nav` 등록, 홈(`mkdocs/docs/index.md`) 최근 업데이트 갱신, 빌드 검증까지 마친다. 홈은 문서의 내용이 실질적으로 바뀐 경우에만 갱신한다(기준은 `mkdocs-writing-guide` 3.4절). 빌드 검증 명령은 다음과 같고, 통과 기준은 `mkdocs-writing-guide` 6절을 따른다.
     - macOS: `.venv/bin/mkdocs build --strict -f mkdocs/mkdocs.yml`
     - Windows: `.venv/Scripts/mkdocs build --strict -f mkdocs/mkdocs.yml`
 - 사용자가 "실행해줘", "업무노트 실행해줘", "mkdocs 실행해줘" 등을 요청하면, 사용자가 아무것도 하지 않아도 사이트가 열리도록 아래 명령 하나만 백그라운드로 실행한다. 필요한 프로그램이 없으면 확인을 묻지 말고 "필요한 프로그램을 자동으로 설치합니다"라고만 알린 뒤 실행한다. 스크립트가 스스로 필요한 프로그램을 확인하고 설치한 뒤 사이트를 띄우므로 처음 실행 시에는 최대 10분까지 기다릴 수 있다.
     - macOS: `bash setup/serve-mac.sh`
-    - Windows: `powershell -NoProfile -ExecutionPolicy Bypass -File setup\serve-windows.ps1` (반드시 PowerShell에서 실행한다. `\`가 쓰이므로 Git Bash에서 실행하면 `\`가 사라져 경로가 깨지기 때문이다.)
+    - Windows: `powershell -NoProfile -ExecutionPolicy Bypass -File setup/serve-windows.ps1`
     - 출력에 `Serving on`이 나오거나 <http://127.0.0.1:8000>이 응답하면 주소를 안내한다. `이미 8000 포트에서 실행 중입니다`가 나오면 새로 띄우지 않고 기존 주소를 안내한다.
     - 종료 코드가 3이면 아래 "사용자 조치 절차"를 따른다.
 
