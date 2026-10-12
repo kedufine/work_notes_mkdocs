@@ -74,8 +74,8 @@ description: >-
 
 ```json
 {
-  "package": "2024-cho-hojae",
-  "handover_from": "조호재",
+  "package": "2024-hong-gildong",
+  "handover_from": "홍길동",
   "handover_to": "",
   "date": "2026-10-12",
   "due": "",
@@ -87,7 +87,7 @@ description: >-
       "question": "통보 대상의 부서명, 담당 역할, 연락처를 알려 주시겠습니까?",
       "type": "담당·연락처",
       "priority": "상",
-      "doc": "handover/2024-cho-hojae/index.md > 3.1 공통단위과제 종료"
+      "doc": "handover/2024-hong-gildong/index.md > 3.1 공통단위과제 종료"
     }
   ]
 }
@@ -106,10 +106,10 @@ description: >-
 
 ```bash
 .venv/bin/python .agents/skills/handover-questionnaire/scripts/questionnaire.py build \
-  --spec "2. 변환 중간본/질문지/2024-cho-hojae.json"
+  --spec "2. 변환 중간본/질문지/2024-hong-gildong.json"
 ```
 
-- 결과 파일은 `3. 업무인수인계 질문지/YYMMDD <인계자명> 업무인계인수 질문지.xlsx`입니다(예: `261012 조호재 업무인계인수 질문지.xlsx`). 이 파일명 형식은 바꾸지 않습니다.
+- 결과 파일은 `3. 업무인수인계 질문지/YYMMDD <인계자명> 업무인계인수 질문지.xlsx`입니다(예: `261012 홍길동 업무인계인수 질문지.xlsx`). 이 파일명 형식은 바꾸지 않습니다.
 - 파일에는 작성 방법을 적은 `안내` 시트와 `질문지` 시트가 들어 있습니다. `질문지` 시트의 열은 `번호`, `업무 분야`, `관련 자료`, `관련 내용`, `질문`, `질문 유형`, `중요도`, `답변`, `참고 자료·비고`, `반영 문서`이며, 인계자는 노란색 칸인 `답변`과 `참고 자료·비고`만 작성합니다.
 - **같은 이름의 파일이 이미 있으면 스크립트가 덮어쓰지 않고 종료 코드 1로 끝납니다.** 그 파일은 사용자가 이미 인계자에게 보냈을 수 있기 때문입니다. 아직 보내지 않았다는 것을 사용자에게 확인한 경우에만 `--force`로 다시 만듭니다.
 - 회신을 받은 뒤에 추가로 물어볼 것이 생기면 기존 파일을 고치지 않고, 새 작성일로 질문지를 하나 더 만듭니다.
@@ -127,7 +127,7 @@ description: >-
 
 | 질문지 파일 | 작성일 | 질문 수 | 회신일 | 답변 수 | 미회신 | 상태 |
 | :--- | :---: | :---: | :---: | :---: | :---: | :--- |
-| `261012 조호재 업무인계인수 질문지.xlsx` | 2026-10-12 | 24 | - | - | - | 회신 대기 |
+| `261012 홍길동 업무인계인수 질문지.xlsx` | 2026-10-12 | 24 | - | - | - | 회신 대기 |
 ```
 
 - **마스터 허브(`handover/index.md`)**: 해당 건의 `상태`를 `질문지 회신 대기`로 바꿉니다.
@@ -150,8 +150,8 @@ description: >-
 ```bash
 .venv/bin/python .agents/skills/handover-questionnaire/scripts/questionnaire.py list
 .venv/bin/python .agents/skills/handover-questionnaire/scripts/questionnaire.py read \
-  "3. 업무인수인계 질문지/261012 조호재 업무인계인수 질문지.xlsx" \
-  --json "2. 변환 중간본/질문지/2024-cho-hojae-답변.json"
+  "3. 업무인수인계 질문지/261012 홍길동 업무인계인수 질문지.xlsx" \
+  --json "2. 변환 중간본/질문지/2024-hong-gildong-답변.json"
 ```
 
 - `list`는 폴더의 파일별 질문 수, 답변 수, 미회신 수, 수정 시각을 보여 줍니다. 같은 질문지의 사본이 여러 개이면(보낸 파일과 회신 파일을 다른 이름으로 둔 경우) 답변이 적힌 파일 가운데 수정 시각이 가장 늦은 것을 회신 파일로 보고, 어느 파일을 사용했는지 사용자에게 알립니다. 작성일이 다른 질문지(추가 질문지)는 서로 다른 질문지이므로 각각 읽습니다.

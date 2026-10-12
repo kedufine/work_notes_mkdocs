@@ -72,7 +72,7 @@ flowchart LR
 | `mkdocs/docs/handover/` | AI 에이전트가 읽기 쉽게 재구성한 통합 문서(인수인계 건마다 하나)가 위치하며, 웹 사이트에 표시됩니다. 질문지 답변이 돌아오면 이 문서가 보강됩니다. |
 | `mkdocs/mkdocs.yml` | 사이트 환경 설정, 테마, 플러그인 및 내비게이션 메뉴(`nav`) 정의 파일입니다. |
 | `setup/` | Windows 및 macOS 환경을 위한 자동 설치 및 실행 스크립트(`setup-*`, `serve-*`) 모음입니다. |
-| `LICENSES/` | 서드파티 소프트웨어(Material for MkDocs 등)의 라이선스 전문입니다. 사이트 빌드 시 자동 복사됩니다. |
+| `LICENSES/` | 사용 중인 오픈소스 목록과 라이선스를 정리한 고지(`README.md`)와, Material for MkDocs의 라이선스 전문(`mkdocs-material.txt`)입니다. 전문은 사이트 빌드 시 자동 복사됩니다. |
 | `.agents/skills/` | AI 코딩 에이전트가 변환·정리·다이어그램 시각화 시 수행하는 표준 작업 절차(스킬)입니다. |
 | `AGENTS.md`, `CLAUDE.md` | AI 코딩 에이전트가 프로젝트를 이해하고 명령을 수행할 수 있도록 정의된 프로젝트 표준 지침입니다. |
 
@@ -318,7 +318,7 @@ AI 에이전트는 [`.agents/skills/handover-to-mkdocs/SKILL.md`](.agents/skills
 
 ### 4.3 질문지를 인계자에게 전달하기
 
-등록이 끝나면 AI 에이전트가 [`.agents/skills/handover-questionnaire/SKILL.md`](.agents/skills/handover-questionnaire/SKILL.md) 지침에 따라 **`3. 업무인수인계 질문지/`** 폴더에 질문지를 만듭니다. 파일명은 `작성일(YYMMDD) 인계자명 업무인계인수 질문지.xlsx` 형식입니다(예: `261012 조호재 업무인계인수 질문지.xlsx`).
+등록이 끝나면 AI 에이전트가 [`.agents/skills/handover-questionnaire/SKILL.md`](.agents/skills/handover-questionnaire/SKILL.md) 지침에 따라 **`3. 업무인수인계 질문지/`** 폴더에 질문지를 만듭니다. 파일명은 `작성일(YYMMDD) 인계자명 업무인계인수 질문지.xlsx` 형식입니다(예: `261012 홍길동 업무인계인수 질문지.xlsx`).
 
 | 시트 | 내용 |
 | :--- | :--- |
@@ -495,6 +495,8 @@ git archive --format=zip -o 업무노트_전달본.zip HEAD
 
 - 본 템플릿 프로젝트는 [MIT License](LICENSE)를 따릅니다.
 - **Material for MkDocs**: Martin Donath ([MIT License](LICENSES/mkdocs-material.txt))
-- **kordoc**: Chris Ryu ([kordoc Repository](https://github.com/chrisryugj/kordoc))
-- **OfficeCLI**: iOfficeAI ([OfficeCLI Repository](https://github.com/iOfficeAI/OfficeCLI))
-- **Beautiful Mermaid**: [beautiful-mermaid](https://github.com/mermaid-js/mermaid)
+- **kordoc**: Chris Ryu ([kordoc Repository](https://github.com/chrisryugj/kordoc), MIT License)
+- **OfficeCLI**: iOfficeAI ([OfficeCLI Repository](https://github.com/iOfficeAI/OfficeCLI), Apache License 2.0)
+- **Pretty Mermaid Skills**: imxv ([Pretty-mermaid-skills Repository](https://github.com/imxv/Pretty-mermaid-skills), [MIT License](.agents/skills/pretty-mermaid/LICENSE))
+- **beautiful-mermaid**: lukilabs ([beautiful-mermaid Repository](https://github.com/lukilabs/beautiful-mermaid), MIT License)
+- 그 밖에 사용하는 오픈소스(MkDocs, Mermaid, Vega·Vega-Lite·Vega-Embed, Pretendard 등)와 각 라이선스는 [서드파티 소프트웨어 고지](LICENSES/README.md)에 정리되어 있습니다.
