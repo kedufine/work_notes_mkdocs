@@ -132,12 +132,17 @@ Ok "$(& $Mkdocs --version), Material for MkDocs $materialVer"
 
 if ($Prepare) { Info '준비가 끝났습니다.'; exit 0 }
 
-# 이미 사이트가 떠 있으면 새로 띄우지 않는다
-& $VenvPy -c "import socket,sys; s=socket.socket(); s.settimeout(1); sys.exit(0 if s.connect_ex(('$HostAddr',$Port))==0 else 1)"
-if ($LASTEXITCODE -eq 0) {
-    Info "이미 $Port 포트에서 실행 중입니다. 브라우저에서 $Url 을 여십시오."
+# 이미 사이트가 떠 있으면 새로 띄우지 않고, 8000 포트를 다른 프로그램이 쓰고 있으면 빈 포트를 쓴다
+$probe = & $VenvPy (Join-Path $PSScriptRoot 'find-port.py') $HostAddr | Select-Object -Last 1
+$portState, $foundPort = "$probe".Trim() -split ' '
+if ($portState -eq 'running') {
+    Info "이미 $foundPort 포트에서 실행 중입니다. 브라우저에서 http://${HostAddr}:$foundPort 을 여십시오."
     exit 0
 }
+if ($portState -ne 'free') { Fail '8000~8010 포트를 모두 다른 프로그램이 쓰고 있습니다. 쓰지 않는 프로그램을 종료한 뒤 다시 실행하십시오.' }
+if ([int]$foundPort -ne $Port) { Warn "$Port 포트를 다른 프로그램이 쓰고 있어 $foundPort 포트로 실행합니다." }
+$Port = [int]$foundPort
+$Url = "http://${HostAddr}:$Port"
 
 Info "사이트를 실행합니다: $Url (종료: Ctrl + C)"
 & $Mkdocs serve -a "${HostAddr}:$Port" -f mkdocs\mkdocs.yml

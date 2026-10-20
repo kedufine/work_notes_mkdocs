@@ -30,7 +30,8 @@
 | `mkdocs/docs/index.md` | 사이트 홈. 요약 표와 최근 업데이트 표가 있다. |
 | `mkdocs/mkdocs.yml` | 사이트 설정과 `nav`. |
 | `LICENSES/` | 사용 중인 서드파티 소프트웨어의 고지 목록(`README.md`)과 라이선스 전문(현재 Material for MkDocs의 `mkdocs-material.txt`). 전문은 원문을 그대로 두며, 빌드할 때 `mkdocs/hooks/licenses.py`가 사이트에 복사한다. 의존성을 추가하거나 버전을 올리면 고지 목록을 함께 갱신한다. |
-| `setup/` | 전체 설치 스크립트(`setup-mac.sh`, `setup-windows.ps1`)와 사이트 실행 스크립트(`serve-mac.sh`, `serve-windows.ps1`). |
+| `setup/` | 전체 설치 스크립트(`setup-mac.sh`, `setup-windows.ps1`)와 사이트 실행 스크립트(`serve-mac.sh`, `serve-windows.ps1`), 실행 스크립트가 빈 포트를 고를 때 쓰는 `find-port.py`. |
+| `tests/` | `convert.py`와 `questionnaire.py`의 자동 테스트(표준 라이브러리 `unittest`). 두 스크립트를 고치면 `.venv/bin/python -m unittest discover -s tests`(Windows는 `.venv/Scripts/python`)로 확인한다. |
 
 원본, 중간본, 질문지는 `.gitignore`로 제외한다.
 
@@ -70,7 +71,7 @@
 - 사용자가 "실행해줘", "업무노트 실행해줘", "mkdocs 실행해줘" 등을 요청하면, 사용자가 아무것도 하지 않아도 사이트가 열리도록 아래 명령 하나만 백그라운드로 실행한다. 필요한 프로그램이 없으면 확인을 묻지 말고 "필요한 프로그램을 자동으로 설치합니다"라고만 알린 뒤 실행한다. 스크립트가 스스로 필요한 프로그램을 확인하고 설치한 뒤 사이트를 띄우므로 처음 실행 시에는 최대 10분까지 기다릴 수 있다.
     - macOS: `bash setup/serve-mac.sh`
     - Windows: `powershell -NoProfile -ExecutionPolicy Bypass -File setup/serve-windows.ps1`
-    - 출력에 `Serving on`이 나오거나 <http://127.0.0.1:8000>이 응답하면 주소를 안내한다. `이미 8000 포트에서 실행 중입니다`가 나오면 새로 띄우지 않고 기존 주소를 안내한다.
+    - 출력에 `Serving on`이 나오면 그 줄의 주소를 안내한다. 8000 포트를 다른 프로그램이 쓰고 있으면 스크립트가 8001~8010 가운데 빈 포트로 실행하므로, 주소를 8000으로 단정하지 않고 출력에 나온 주소를 그대로 안내한다. `이미 <포트> 포트에서 실행 중입니다`가 나오면 새로 띄우지 않고 그 주소를 안내한다.
     - 종료 코드가 3이면 아래 "사용자 조치 절차"를 따른다.
 
 ## 사용자 조치 절차

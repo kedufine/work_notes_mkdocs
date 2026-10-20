@@ -109,11 +109,21 @@ ok "$(.venv/bin/mkdocs --version | cut -d' ' -f1-3), Material for MkDocs $("$VEN
 
 [ "$PREPARE_ONLY" = 1 ] && { info "준비가 끝났습니다."; exit 0; }
 
-# 이미 사이트가 떠 있으면 새로 띄우지 않는다
-if "$VENV_PY" -c "import socket,sys; s=socket.socket(); s.settimeout(1); sys.exit(0 if s.connect_ex(('$HOST',$PORT))==0 else 1)"; then
-    info "이미 $PORT 포트에서 실행 중입니다. 브라우저에서 $URL 을 여십시오."
-    exit 0
-fi
+# 이미 사이트가 떠 있으면 새로 띄우지 않고, 8000 포트를 다른 프로그램이 쓰고 있으면 빈 포트를 쓴다
+read -r PORT_STATE FOUND_PORT < <("$VENV_PY" setup/find-port.py "$HOST")
+case "$PORT_STATE" in
+    running)
+        info "이미 $FOUND_PORT 포트에서 실행 중입니다. 브라우저에서 http://$HOST:$FOUND_PORT 을 여십시오."
+        exit 0 ;;
+    free)
+        if [ "$FOUND_PORT" != "$PORT" ]; then
+            warn "$PORT 포트를 다른 프로그램이 쓰고 있어 $FOUND_PORT 포트로 실행합니다."
+        fi
+        PORT="$FOUND_PORT"
+        URL="http://$HOST:$PORT" ;;
+    *)
+        fail "8000~8010 포트를 모두 다른 프로그램이 쓰고 있습니다. 쓰지 않는 프로그램을 종료한 뒤 다시 실행하십시오." ;;
+esac
 
 info "사이트를 실행합니다: $URL (종료: Ctrl + C)"
 exec .venv/bin/mkdocs serve -a "$HOST:$PORT" -f mkdocs/mkdocs.yml
