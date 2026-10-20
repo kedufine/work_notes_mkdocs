@@ -53,7 +53,19 @@ function Refresh-Path {
     $user = [Environment]::GetEnvironmentVariable('Path', 'User')
     $env:Path = "$machine;$user;$env:LOCALAPPDATA\OfficeCLI;$env:APPDATA\npm"
 }
+# winget은 Git·Node.js를 설치해야 할 때만 필요하다. 둘 다 이미 있으면 winget이 없어도 멈추지 않는다
+function Ensure-Winget([string]$label) {
+    if (Has 'winget') { return }
+    Start-Process 'ms-windows-store://pdp/?productid=9NBLGGH4NNS1' -ErrorAction SilentlyContinue
+    Need-User '앱 설치 관리자(winget) 설치' @(
+        "$label 을(를) 설치하려면 Windows 패키지 관리자(winget)가 필요합니다.",
+        '1. 방금 열린 Microsoft Store의 "앱 설치 관리자(App Installer)" 페이지에서 "설치" 또는 "업데이트"를 누르십시오.',
+        '   페이지가 열리지 않았다면 Microsoft Store에서 "앱 설치 관리자"를 검색하십시오.',
+        "2. Microsoft Store를 쓸 수 없는 회사 PC라면 IT 담당자에게 $label 설치를 요청하십시오. 설치가 끝나면 winget 없이도 이어서 진행됩니다."
+    )
+}
 function Winget-Install([string]$id, [string]$label) {
+    Ensure-Winget $label
     Write-Host "  $label 을(를) 설치합니다. 사용자 계정 컨트롤 창이 뜨면 '예'를 누르십시오."
     winget install -e --id $id --accept-source-agreements --accept-package-agreements
     Refresh-Path
@@ -68,19 +80,7 @@ Write-Host "인수인계 업무노트 설치를 시작합니다. 프로젝트 �
 Refresh-Path
 
 # ---------------------------------------------------------------------------
-Step '1/8' 'winget (Windows 패키지 관리자)'
-if (-not (Has 'winget')) {
-    Start-Process 'ms-windows-store://pdp/?productid=9NBLGGH4NNS1' -ErrorAction SilentlyContinue
-    Need-User '앱 설치 관리자(winget) 설치' @(
-        '1. 방금 열린 Microsoft Store의 "앱 설치 관리자(App Installer)" 페이지에서 "설치" 또는 "업데이트"를 누르십시오.',
-        '   페이지가 열리지 않았다면 Microsoft Store에서 "앱 설치 관리자"를 검색하십시오.',
-        '2. Microsoft Store를 쓸 수 없는 회사 PC라면 IT 담당자에게 Git과 Node.js LTS 설치를 요청하십시오.'
-    )
-}
-Ok "winget $(winget --version)"
-
-# ---------------------------------------------------------------------------
-Step '2/8' 'Git · Node.js'
+Step '1/7' 'Git · Node.js'
 if (Has 'git') { Ok "$(git --version)" } else {
     Winget-Install 'Git.Git' 'Git'
     if (Has 'git') { Ok "$(git --version)" } else { Need-Admin-Install 'Git' 'https://git-scm.com/download/win' }
@@ -92,7 +92,7 @@ if (Node-Ok) { Ok "Node.js $(node --version)" } else {
 }
 
 # ---------------------------------------------------------------------------
-Step '3/8' 'PowerShell 스크립트 실행 허용 (현재 사용자)'
+Step '2/7' 'PowerShell 스크립트 실행 허용 (현재 사용자)'
 # 이후 사용자가 PowerShell에서 npm 등을 직접 실행할 수 있도록 한다
 $policy = Get-ExecutionPolicy -Scope CurrentUser
 if ($policy -eq 'Undefined' -or $policy -eq 'Restricted' -or $policy -eq 'AllSigned') {
@@ -105,7 +105,7 @@ if ($policy -eq 'Undefined' -or $policy -eq 'Restricted' -or $policy -eq 'AllSig
 } else { Ok "현재 정책: $policy" }
 
 # ---------------------------------------------------------------------------
-Step '4/8' 'kordoc (한글·PDF·워드·엑셀·이미지 읽기)'
+Step '3/7' 'kordoc (한글·PDF·워드·엑셀·이미지 읽기)'
 if (Has 'kordoc') { Ok 'kordoc 이미 설치됨' } else {
     # npm.ps1 대신 npm.cmd를 호출해 실행 정책의 영향을 받지 않게 한다
     # npm 12부터 설치 스크립트가 기본 차단되므로 OCR 엔진(onnxruntime-node)의 스크립트를 허용한다
@@ -115,7 +115,7 @@ if (Has 'kordoc') { Ok 'kordoc 이미 설치됨' } else {
 }
 
 # ---------------------------------------------------------------------------
-Step '5/8' 'OfficeCLI (파워포인트 읽기)'
+Step '4/7' 'OfficeCLI (파워포인트 읽기)'
 if (Has 'officecli') { Ok 'officecli 이미 설치됨' } else {
     # 공식 설치 스크립트는 실패 시 exit를 호출하므로 별도 프로세스로 실행한다
     $installer = Join-Path $env:TEMP 'officecli-install.ps1'
@@ -128,7 +128,7 @@ if (Has 'officecli') { Ok 'officecli 이미 설치됨' } else {
 }
 
 # ---------------------------------------------------------------------------
-Step '6/8' '긴 경로 허용'
+Step '5/7' '긴 경로 허용'
 & git config --global core.longpaths true
 $long = (Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem' -Name LongPathsEnabled -ErrorAction SilentlyContinue).LongPathsEnabled
 if ($long -eq 1) { Ok 'Windows 긴 경로가 이미 허용되어 있습니다.' } else {
@@ -137,7 +137,7 @@ if ($long -eq 1) { Ok 'Windows 긴 경로가 이미 허용되어 있습니다.' 
 }
 
 # ---------------------------------------------------------------------------
-Step '7/8' 'Python 가상환경과 MkDocs · Material for MkDocs · 다이어그램 도구'
+Step '6/7' 'Python 가상환경과 MkDocs · Material for MkDocs · 다이어그램 도구'
 # 사이트 실행 스크립트가 Python 준비(없으면 uv로 내려받기, UAC 불필요)·.venv 점검·Material 설치를 맡는다
 $venvPy = Join-Path $Root '.venv\Scripts\python.exe'
 & powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot 'serve-windows.ps1') -Prepare
@@ -155,7 +155,7 @@ if (Test-Path -LiteralPath (Join-Path $mermaid 'node_modules')) { Ok 'pretty-mer
 }
 
 # ---------------------------------------------------------------------------
-Step '8/8' '설치 확인'
+Step '7/7' '설치 확인'
 & $venvPy .agents\skills\handover-to-mkdocs\scripts\convert.py --check
 if ($LASTEXITCODE -eq 0) {
     Write-Host ''
