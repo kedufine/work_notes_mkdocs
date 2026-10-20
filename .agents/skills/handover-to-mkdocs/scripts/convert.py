@@ -57,6 +57,20 @@ UNSUPPORTED_HINTS = {
     ".egg": "같은 위치에 압축을 풀고, 압축 파일은 원본 폴더에서 빼십시오.",
     ".alz": "같은 위치에 압축을 풀고, 압축 파일은 원본 폴더에서 빼십시오.",
     ".rar": "같은 위치에 압축을 풀고, 압축 파일은 원본 폴더에서 빼십시오.",
+    # 한컴오피스·오픈오피스 형식
+    ".cell": "한셀에서 열어 .xlsx로 다시 저장하고, 원래 파일과 바꿔 넣으십시오.",
+    ".show": "한쇼에서 열어 .pptx로 다시 저장하고, 원래 파일과 바꿔 넣으십시오.",
+    ".odt": "Word나 한글에서 열어 .docx로 다시 저장하고, 원래 파일과 바꿔 넣으십시오.",
+    ".ods": "Excel이나 한셀에서 열어 .xlsx로 다시 저장하고, 원래 파일과 바꿔 넣으십시오.",
+    ".odp": "PowerPoint나 한쇼에서 열어 .pptx로 다시 저장하고, 원래 파일과 바꿔 넣으십시오.",
+    # 메일은 본문과 첨부 파일을 따로 꺼내야 한다
+    ".msg": "Outlook에서 메일을 PDF로 인쇄해 넣고, 첨부 파일은 따로 저장해 원본 폴더에 넣으십시오.",
+    ".eml": "메일 프로그램에서 열어 PDF로 인쇄해 넣고, 첨부 파일은 따로 저장해 원본 폴더에 넣으십시오.",
+    # kordoc이 읽지 않는 이미지 형식
+    ".gif": "그림판 등에서 열어 .png로 다시 저장하고, 원래 파일과 바꿔 넣으십시오.",
+    ".bmp": "그림판 등에서 열어 .png로 다시 저장하고, 원래 파일과 바꿔 넣으십시오.",
+    ".tif": "그림판 등에서 열어 .png로 다시 저장하고, 원래 파일과 바꿔 넣으십시오.",
+    ".tiff": "그림판 등에서 열어 .png로 다시 저장하고, 원래 파일과 바꿔 넣으십시오.",
 }
 
 # 목록에서 아예 제외하는 시스템·임시 파일
@@ -452,11 +466,19 @@ def images_dir_for(out: Path, out_md: Path) -> str | None:
     return d.relative_to(out).as_posix() if d.is_dir() else None
 
 
+def remove_outputs(out: Path, output: str) -> None:
+    # 원본이 사라졌거나 다시 변환할 때, 이전 중간본이 최신 내용처럼 검색되지 않도록 지운다
+    out_md = out / output
+    out_md.unlink(missing_ok=True)
+    shutil.rmtree(out / "images" / out_md.stem, ignore_errors=True)
+
+
 def convert_one(entry: dict, src: Path, out: Path, tools: dict, args) -> None:
     ext = entry["ext"]
     out_md = out / entry["output"]
     route = classify(ext)
     entry.update({"tool": None, "status": None, "error_code": None, "error": None, "hint": None})
+    remove_outputs(out, entry["output"])
 
     if route == "unsupported":
         entry.update(status="unsupported", hint=UNSUPPORTED_HINTS.get(ext, "변환할 수 있는 형식이 아닙니다. 필요하면 내용을 직접 확인하십시오."))
@@ -628,11 +650,13 @@ def main() -> int:
         manifest["updated_at"] = datetime.now().strftime("%Y-%m-%d %H:%M")
         write_json_atomic(out / MANIFEST_NAME, manifest)
 
-    # 원본 폴더에서 사라진 파일은 삭제 표시만 하고, 반영된 문서가 있으면 재반영 대상으로 둔다
+    # 원본 폴더에서 사라진 파일은 삭제 표시와 함께 중간본을 지우고, 반영된 문서가 있으면 재반영 대상으로 둔다
     for fid, e in entries.items():
         if fid not in seen and e.get("status") != "removed":
             e["status"] = "removed"
             e["needs_republish"] = bool(e.get("published"))
+            if e.get("output"):
+                remove_outputs(out, e["output"])
     manifest["updated_at"] = datetime.now().strftime("%Y-%m-%d %H:%M")
     manifest["tools"] = tool_versions(tools["kordoc"], tools["officecli"])
     write_json_atomic(out / MANIFEST_NAME, manifest)
