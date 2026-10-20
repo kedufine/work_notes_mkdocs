@@ -72,9 +72,10 @@ extra_css:
 extra_javascript:
   - javascripts/pretty-mermaid.js
   - javascripts/vegalite.js
-  - https://cdn.jsdelivr.net/npm/vega@5
-  - https://cdn.jsdelivr.net/npm/vega-lite@5
-  - https://cdn.jsdelivr.net/npm/vega-embed@6
+  # 버전을 고정해 같은 문서가 언제나 같게 보이도록 한다. 바꿀 때는 javascripts/vegalite.js의 주소도 같이 고친다
+  - https://cdn.jsdelivr.net/npm/vega@5.33.1
+  - https://cdn.jsdelivr.net/npm/vega-lite@5.23.0
+  - https://cdn.jsdelivr.net/npm/vega-embed@6.29.0
 
 extra:
   # Material 하단 "Made with Material for MkDocs" 문구 유지 여부

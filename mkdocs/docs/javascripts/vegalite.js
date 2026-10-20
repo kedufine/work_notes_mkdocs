@@ -6,9 +6,10 @@
  * - vega, vega-lite, vega-embed 가 로드되기 전이면 로드를 대기/보장한다.
  * ========================================================================= */
 (() => {
-  const VEGA_URL = "https://cdn.jsdelivr.net/npm/vega@5";
-  const VEGALITE_URL = "https://cdn.jsdelivr.net/npm/vega-lite@5";
-  const VEGAEMBED_URL = "https://cdn.jsdelivr.net/npm/vega-embed@6";
+  // mkdocs.yml 의 extra_javascript 주소와 같아야 이미 불러온 스크립트를 다시 받지 않는다.
+  const VEGA_URL = "https://cdn.jsdelivr.net/npm/vega@5.33.1";
+  const VEGALITE_URL = "https://cdn.jsdelivr.net/npm/vega-lite@5.23.0";
+  const VEGAEMBED_URL = "https://cdn.jsdelivr.net/npm/vega-embed@6.29.0";
 
   let loadPromise = null;
 
@@ -16,18 +17,25 @@
     new Promise((resolve, reject) => {
       const existing = document.querySelector(`script[src="${src}"]`);
       if (existing) {
-        if (existing.dataset.loaded === "true" || window.vegaEmbed) return resolve();
+        // mkdocs.yml 이 넣은 스크립트는 DOMContentLoaded 전에 이미 실행되었거나 실패했다.
+        // 끝난 이벤트를 기다리면 영원히 멈추므로 바로 넘기고, 전역 객체 확인은 호출한 쪽에 맡긴다.
+        if (existing.dataset.dynamic !== "true" || existing.dataset.loaded === "true") return resolve();
         existing.addEventListener("load", resolve);
         existing.addEventListener("error", reject);
         return;
       }
       const script = document.createElement("script");
       script.src = src;
+      script.dataset.dynamic = "true";
       script.onload = () => {
         script.dataset.loaded = "true";
         resolve();
       };
-      script.onerror = reject;
+      script.onerror = (err) => {
+        // 실패한 태그를 남기면 다음 시도가 그 태그의 끝난 이벤트를 기다리게 된다.
+        script.remove();
+        reject(err);
+      };
       document.head.appendChild(script);
     });
 
@@ -39,6 +47,9 @@
       if (!window.vega) await loadScript(VEGA_URL);
       if (!window.vegaLite) await loadScript(VEGALITE_URL);
       if (!window.vegaEmbed) await loadScript(VEGAEMBED_URL);
+      if (!window.vega || !window.vegaLite || !window.vegaEmbed) {
+        throw new Error("Vega 라이브러리를 찾을 수 없습니다.");
+      }
       return window.vegaEmbed;
     })();
 
@@ -104,6 +115,16 @@
       targets.forEach((el) => renderChart(el, vegaEmbed));
     } catch (err) {
       console.error("[Vega-Lite] 라이브러리 로드 실패:", err);
+      // 실패한 로드를 기억하지 않아야 연결이 돌아온 뒤 다시 시도할 수 있다.
+      loadPromise = null;
+      // 인터넷이 막힌 환경에서 빈 자리 대신 안내와 차트 원본을 보여 준다.
+      targets.forEach((el) => {
+        el.dataset.source ??= el.textContent.trim();
+        const notice = document.createElement("pre");
+        notice.style.cssText = "color: var(--md-default-fg-color--light); background: var(--md-code-bg-color); padding: 1rem; border-radius: 4px; white-space: pre-wrap;";
+        notice.textContent = `차트 도구를 불러오지 못했습니다. 인터넷 연결을 확인하십시오. 아래는 차트의 원본 데이터입니다.\n\n${el.dataset.source}`;
+        el.replaceChildren(notice);
+      });
     }
   };
 

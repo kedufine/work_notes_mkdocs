@@ -55,10 +55,10 @@
 | 소프트웨어 | 버전 | 용도 | 라이선스 |
 | :--- | :--- | :--- | :--- |
 | [beautiful-mermaid](https://github.com/lukilabs/beautiful-mermaid) | 1.1.3 | Mermaid 다이어그램 렌더링 | MIT |
-| [Mermaid](https://github.com/mermaid-js/mermaid) | 11 | beautiful-mermaid가 지원하지 않는 다이어그램 유형의 렌더링 | MIT |
-| [Vega](https://github.com/vega/vega) | 5 | 차트 렌더링 | BSD-3-Clause |
-| [Vega-Lite](https://github.com/vega/vega-lite) | 5 | 차트 문법 | BSD-3-Clause |
-| [Vega-Embed](https://github.com/vega/vega-embed) | 6 | 차트를 문서에 삽입 | BSD-3-Clause |
+| [Mermaid](https://github.com/mermaid-js/mermaid) | 11.17.2 | beautiful-mermaid가 지원하지 않는 다이어그램 유형의 렌더링 | MIT |
+| [Vega](https://github.com/vega/vega) | 5.33.1 | 차트 렌더링 | BSD-3-Clause |
+| [Vega-Lite](https://github.com/vega/vega-lite) | 5.23.0 | 차트 문법 | BSD-3-Clause |
+| [Vega-Embed](https://github.com/vega/vega-embed) | 6.29.0 | 차트를 문서에 삽입 | BSD-3-Clause |
 | [Pretendard](https://github.com/orioncactus/pretendard) | 1.3.9 | 사이트 글꼴 | OFL-1.1 |
 
 ## 4. 목록을 갱신해야 하는 경우

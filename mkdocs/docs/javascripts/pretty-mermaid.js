@@ -6,12 +6,12 @@
  * - 색은 사이트 디자인 토큰(--kb-*)에서 읽는다. XY 차트가 hex 값으로 계열 색을
  *   계산하므로 CSS 변수 대신 계산된 hex 를 넘기고, 라이트/다크 전환 시 다시 그린다.
  * - beautiful-mermaid 가 지원하지 않는 유형(gantt, pie, mindmap 등)이나 파싱 오류는
- *   Material 과 같은 mermaid@11 로 대신 그린다.
+ *   Material 과 같은 mermaid 11 버전(FALLBACK_URL 에 고정)으로 대신 그린다.
  * - 작성 규칙: .agents/skills/mkdocs-writing-guide/SKILL.md 5.3절
  * ========================================================================= */
 (() => {
   const RENDERER_URL = "https://cdn.jsdelivr.net/npm/beautiful-mermaid@1.1.3/+esm";
-  const FALLBACK_URL = "https://unpkg.com/mermaid@11/dist/mermaid.min.js";
+  const FALLBACK_URL = "https://unpkg.com/mermaid@11.17.2/dist/mermaid.min.js";
   const FONT = "Pretendard Variable";
   const SUPPORTED =
     /^(graph|flowchart|sequenceDiagram|stateDiagram(-v2)?|classDiagram|erDiagram|xychart-beta)\b/;
@@ -128,9 +128,16 @@
     return svg;
   };
 
+  // 스크립트 태그 실패는 Event 로, 모듈 import 실패는 "Failed to fetch ..." 오류로 온다.
+  const isLoadFailure = (error) =>
+    error instanceof Event || /fetch|import|load/i.test(error?.message ?? "");
+
   const renderError = (source, error) => {
     const pre = document.createElement("pre");
-    pre.textContent = `Mermaid 렌더링 실패: ${error.message}\n\n${source}`;
+    const message = isLoadFailure(error)
+      ? "다이어그램 도구를 불러오지 못했습니다. 인터넷 연결을 확인하십시오. 아래는 다이어그램의 원본입니다."
+      : `Mermaid 렌더링 실패: ${error.message}`;
+    pre.textContent = `${message}\n\n${source}`;
     return pre.outerHTML;
   };
 
