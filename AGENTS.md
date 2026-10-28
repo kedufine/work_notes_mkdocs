@@ -29,6 +29,7 @@
 | `mkdocs/docs/handover/` | 재구성한 인수인계 문서. 마스터 허브는 `handover/index.md`, 건별 폴더 `handover/<건별-슬러그>/`에는 개요 문서 `index.md`와 업무별 하위 문서 `<주제>.md`가 있다. |
 | `mkdocs/docs/index.md` | 사이트 홈. 요약 표와 최근 업데이트 표가 있다. |
 | `mkdocs/mkdocs.yml` | 사이트 설정과 `nav`. |
+| `mkdocs/overrides/`, `mkdocs/hooks/` | 템플릿 재정의와 빌드 훅. 홈 표지는 `overrides/partials/home-cover.html`이 그린다. 사이트의 색·글꼴·간격은 `mkdocs/docs/stylesheets/extra.css` 1절의 디자인 토큰에서 정한다. |
 | `LICENSES/` | 사용 중인 서드파티 소프트웨어의 고지 목록(`README.md`)과 라이선스 전문(현재 Material for MkDocs의 `mkdocs-material.txt`). 전문은 원문을 그대로 두며, 빌드할 때 `mkdocs/hooks/licenses.py`가 사이트에 복사한다. 의존성을 추가하거나 버전을 올리면 고지 목록을 함께 갱신한다. |
 | `setup/` | 전체 설치 스크립트(`setup-mac.sh`, `setup-windows.ps1`)와 사이트 실행 스크립트(`serve-mac.sh`, `serve-windows.ps1`), 실행 스크립트가 빈 포트를 고를 때 쓰는 `find-port.py`. |
 | `tests/` | `convert.py`와 `questionnaire.py`의 자동 테스트(표준 라이브러리 `unittest`). 두 스크립트를 고치면 `.venv/bin/python -m unittest discover -s tests`(Windows는 `.venv/Scripts/python`)로 확인한다. |

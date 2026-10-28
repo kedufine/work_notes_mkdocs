@@ -51,17 +51,22 @@
     }));
 
   // 현재 색 구성표의 토큰을 hex 로 읽는다.
+  // 도표 전용 토큰(--kb-diagram-*, extra.css 1절)이 없으면 일반 토큰으로 대신한다.
+  // 바탕(bg)은 도표를 담는 판의 색과 같아야 연결선 라벨의 바탕이 판에 녹아든다.
   const readTokens = () => {
     const style = getComputedStyle(document.body);
-    const token = (name) => style.getPropertyValue(name).trim();
+    const token = (name, fallback) =>
+      style.getPropertyValue(name).trim() || (fallback ? style.getPropertyValue(fallback).trim() : "");
     return {
-      bg: token("--kb-bg"),
+      bg: token("--kb-diagram-bg", "--kb-bg"),
       fg: token("--kb-text-strong"),
       text: token("--kb-text"),
       muted: token("--kb-text-muted"),
-      surface: token("--kb-bg-subtle"),
-      border: token("--kb-border-strong"),
-      series: token("--kb-sem-note"),
+      line: token("--kb-diagram-line", "--kb-text-muted"),
+      surface: token("--kb-diagram-node", "--kb-bg-subtle"),
+      border: token("--kb-diagram-border", "--kb-border-strong"),
+      accent: token("--kb-diagram-accent", "--kb-text"),
+      series: token("--kb-gold", "--kb-sem-note"),
       dark: document.body.getAttribute("data-md-color-scheme") === "slate",
     };
   };
@@ -79,9 +84,9 @@
     const svg = renderMermaidSVG(source, {
       bg: tokens.bg,
       fg: tokens.fg,
-      line: tokens.muted,
-      // 흐름도의 화살촉은 본문색, XY 차트의 계열 색은 의미색(파랑)을 쓴다.
-      accent: isChart ? tokens.series : tokens.text,
+      line: tokens.line,
+      // 흐름도의 화살촉과 XY 차트의 계열 색은 모두 강조색(테라코타)을 쓴다.
+      accent: isChart ? tokens.series : tokens.accent,
       muted: tokens.muted,
       surface: tokens.surface,
       border: tokens.border,
@@ -111,7 +116,7 @@
         primaryBorderColor: tokens.border,
         secondaryColor: tokens.surface,
         tertiaryColor: tokens.bg,
-        lineColor: tokens.muted,
+        lineColor: tokens.line,
         textColor: tokens.text,
         pie1: tokens.series,
         pie2: tokens.text,

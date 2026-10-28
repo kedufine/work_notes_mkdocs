@@ -2,7 +2,8 @@
 ## 사이트 정보
 ## ---------------------------------------------------------------------------
 site_name: 업무노트
-site_description: 업무 지식 아카이브
+# 바닥 띠의 설명으로도 쓰인다(overrides/partials/copyright.html)
+site_description: 전임자의 인수인계 자료와 업무 자료를 업무 단위로 다시 정리해, 업무의 흐름부터 세부 절차와 근거까지 한곳에서 찾을 수 있게 만든 지식 저장소입니다.
 site_author: kwonsu kim
 
 copyright: 'Copyright &copy; 2026 업무노트. All rights reserved.'
@@ -24,18 +25,20 @@ theme:
     logo: custom/logo
   favicon: assets/favicon.svg
 
+  # 색은 모두 stylesheets/extra.css 1절의 디자인 토큰(쪽빛 공문서)에서 정한다.
+  # custom 은 Material의 색 프리셋을 쓰지 않고 CSS 변수만 따르게 한다.
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
-      primary: white
-      accent: black
+      primary: custom
+      accent: custom
       toggle:
         icon: material/weather-night
         name: 다크 모드로 전환
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
-      primary: black
-      accent: white
+      primary: custom
+      accent: custom
       toggle:
         icon: material/weather-sunny
         name: 라이트 모드로 전환
@@ -46,6 +49,7 @@ theme:
     - navigation.tabs.sticky    # 스크롤해도 탭바 고정
     - navigation.sections       # 사이드바 2단계를 굵은 섹션 라벨로
     - navigation.indexes        # 섹션의 index.md를 섹션 자체 링크로
+    - navigation.path           # 제목 위에 경로(홈 › 인수인계 › …) 표시
     - navigation.tracking       # 스크롤에 따라 URL 앵커 갱신
     - navigation.top            # 맨 위로 버튼
     - navigation.footer         # 이전/다음 문서 링크
@@ -67,11 +71,19 @@ theme:
 extra_css:
   # Pretendard Variable — 동적 서브셋(unicode-range 분할)이라 필요한 글자만 내려받음
   - https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css
+  # Noto Serif KR(본명조) 가변 글꼴 — 문서 제목(h1·h2)과 홈 표지의 명조. 글자 범위별로 나뉘어 있어 필요한 조각만 내려받는다
+  - https://cdn.jsdelivr.net/npm/@fontsource-variable/noto-serif-kr@5.3.0/index.css
+  # D2Coding — 코드와 파일 경로의 고정폭 글꼴. 한글 2,350자만 담은 판(약 400KB)이다
+  - https://cdn.jsdelivr.net/npm/d2coding@1.3.2/d2coding-subset.css
   - stylesheets/extra.css
 
 extra_javascript:
   - javascripts/pretty-mermaid.js
   - javascripts/vegalite.js
+  - javascripts/changelog.js
+  - javascripts/faq.js
+  - javascripts/site.js
+  - javascripts/approval.js
   # 버전을 고정해 같은 문서가 언제나 같게 보이도록 한다. 바꿀 때는 javascripts/vegalite.js의 주소도 같이 고친다
   - https://cdn.jsdelivr.net/npm/vega@5.33.1
   - https://cdn.jsdelivr.net/npm/vega-lite@5.23.0

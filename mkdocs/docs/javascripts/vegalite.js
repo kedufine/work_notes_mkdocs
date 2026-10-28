@@ -61,6 +61,51 @@
     return isDark ? "dark" : "default";
   };
 
+  // 사이트의 색과 글꼴(extra.css 1절의 --kb-chart-* 등)을 차트의 기본값으로 쓴다.
+  // 계열색 1번은 비교의 기준(개선 전 등)이 오는 자리라 옅고, 2번이 테라코타다.
+  const siteConfig = () => {
+    const style = getComputedStyle(document.body);
+    const token = (name) => style.getPropertyValue(name).trim();
+    const series = [1, 2, 3, 4, 5, 6].map((n) => token(`--kb-chart-${n}`)).filter(Boolean);
+    const config = {
+      background: "transparent",
+      font: "Pretendard Variable, Pretendard, sans-serif",
+      view: { stroke: null },
+      axis: {
+        labelColor: token("--kb-text-muted"),
+        titleColor: token("--kb-text"),
+        gridColor: token("--kb-border"),
+        domainColor: token("--kb-border-strong"),
+        tickColor: token("--kb-border-strong"),
+        labelFontSize: 12,
+        titleFontSize: 12,
+        titleFontWeight: 600,
+      },
+      legend: {
+        labelColor: token("--kb-text"),
+        titleColor: token("--kb-text"),
+        labelFontSize: 12,
+        titleFontSize: 12,
+        titleFontWeight: 600,
+      },
+      title: { color: token("--kb-text-strong"), fontSize: 14, fontWeight: 700 },
+      mark: { color: token("--kb-brand") },
+      bar: { cornerRadiusEnd: 2 },
+    };
+    if (series.length) config.range = { category: series };
+    return config;
+  };
+
+  // base 위에 override 를 겹친다. 객체끼리는 깊이 합치고, 나머지 값은 override 가 이긴다.
+  const isObject = (value) => value !== null && typeof value === "object" && !Array.isArray(value);
+  const merge = (base, override) => {
+    const result = { ...base };
+    Object.entries(override).forEach(([key, value]) => {
+      result[key] = isObject(value) && isObject(result[key]) ? merge(result[key], value) : value;
+    });
+    return result;
+  };
+
   const renderChart = async (container, vegaEmbed) => {
     if (!container.dataset.source) {
       container.dataset.source = container.textContent.trim();
@@ -81,8 +126,10 @@
       spec.width = "container";
     }
 
+    // 사이트의 색·글꼴을 깔고, 문서의 사양에 같은 값이 있으면 문서의 값을 따른다
+    spec.config = merge(siteConfig(), spec.config || {});
+
     // 범례(Legend)는 하단 가로 방향(orient: bottom, direction: horizontal)을 기본값으로 적용
-    if (!spec.config) spec.config = {};
     if (!spec.config.legend) spec.config.legend = {};
     if (!spec.config.legend.orient) spec.config.legend.orient = "bottom";
     if (!spec.config.legend.direction) spec.config.legend.direction = "horizontal";

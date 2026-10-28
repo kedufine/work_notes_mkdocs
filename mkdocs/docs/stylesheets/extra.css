@@ -1,14 +1,22 @@
 /* ===========================================================================
- * 지식저장소 — 디자인 시스템
+ * 업무노트 — 디자인 시스템 「크림과 테라코타」(Claude 화면의 색 체계)
+ *
+ * Claude 화면처럼 따뜻한 크림색 종이 위에 먹색 글자를 두고, 테라코타 하나로만 강조한다.
+ *   · 바탕은 크림색(#faf9f5), 면과 선은 같은 계열의 베이지. 차가운 회색과 파랑은 쓰지 않는다.
+ *   · 글자와 제목은 먹색(#141413). 강조색은 테라코타(#d97757) 하나뿐이며 링크, 로고,
+ *     도장, 도표의 화살촉처럼 뜻이 있는 자리에만 쓴다. 꾸미기 위한 선·막대에는 쓰지 않는다.
+ *   · 제목(h1·h2)은 명조(Noto Serif KR)로, 본문과 화면 요소는 Pretendard 로 둔다.
+ *   · 표와 목록은 세로선·둥근 상자 없이 가는 가로선으로만 나눈다.
+ *   · 결재란의 도장도 같은 테라코타로 찍어 색이 하나의 가족으로 읽히게 한다.
+ *   · 50대 이상 독자를 기준으로 본문 17px, 줄간격 1.8, 본문 글자 대비 10 : 1 이상을 지킨다.
  *
  * 구성
- *   1. 디자인 토큰       6. 좌측 사이드바
- *   2. 기본 타이포그래피  7. 우측 목차(TOC)
- *   3. 레이아웃          8. 본문 타이포그래피
- *   4. 헤더 / 검색       9. 콘텐츠 컴포넌트
- *   5. 상단 탭바        10. 푸터 / 기타
- *
- * 원칙: 강조색을 쓰지 않는다. 위계는 명도 대비와 여백으로 만든다.
+ *   1. 디자인 토큰          7. 우측 목차(TOC)
+ *   2. 기본 타이포그래피     8. 본문 타이포그래피
+ *   3. 레이아웃             9. 콘텐츠 컴포넌트
+ *   4. 헤더 / 검색          10. 홈 화면
+ *   5. 상단 탭바 / 경로      11. 바닥글 / 기타
+ *   6. 좌측 사이드바         12. 반응형
  * =========================================================================== */
 
 /* ---------------------------------------------------------------------------
@@ -22,55 +30,137 @@
  * :root 에만 쓰면 body 에서 Material 기본값으로 되돌아가 한글이 시스템 고딕으로 떨어진다.
  *
  * 또한 Material의 --md-text-font 만 바꾸는 방식은 뒤따르는 폴백 체인이 라틴 폰트뿐이라
- * 한글 폴백을 제어할 수 없다. 패밀리 전체를 덮어쓴다. */
+ * 한글 폴백을 제어할 수 없다. 패밀리 전체를 덮어쓴다.
+ *
+ * 고정폭 글꼴은 D2Coding(네이버)을 쓴다. 한글과 영문의 폭이 2 : 1 로 맞춰진 한글용 코딩 글꼴이라
+ * 파일 경로처럼 한글과 영문이 섞인 글자가 고르게 보인다. 일반 한글 2,350자만 담은 판을 받으므로
+ * 그 밖의 글자는 Pretendard 로 이어진다. */
 :root,
 body {
   --md-text-font-family:
     "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui,
     "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif;
   --md-code-font-family:
-    "SF Mono", SFMono-Regular, ui-monospace, "Cascadia Mono", Menlo, Consolas,
-    "Liberation Mono", monospace;
+    D2Coding, "SF Mono", SFMono-Regular, ui-monospace, "Cascadia Mono", Menlo, Consolas,
+    "Liberation Mono", "Pretendard Variable", Pretendard, monospace;
 }
 
 :root {
+  /* 제목용 명조. mkdocs.yml 이 불러오는 Noto Serif KR(가변 글꼴)을 쓰고,
+   * 불러오지 못하면 본문 글꼴로 이어져 화면의 결이 깨지지 않게 한다. */
+  --kb-font-serif:
+    "Noto Serif KR Variable", "Noto Serif KR", "Pretendard Variable", Pretendard,
+    "Apple SD Gothic Neo", "Malgun Gothic", serif;
+
+  /* 글자 크기 단계(1rem = 20px). 문서 전체가 아래 단계만 쓴다.
+   * 읽어야 하는 글자는 xs(14px)보다 작게 두지 않는다. 제목은 약 1.28배씩 커진다. */
+  --kb-fs-xs: 0.7rem; /* 14px — 경로, 목차, 작성일, 표 머리, 보조 설명 */
+  --kb-fs-sm: 0.75rem; /* 15px — 메뉴, 표, 단추, 출처 */
+  --kb-fs-md: 0.8rem; /* 16px — 알림 상자, 질문 목록, 기능개선 항목, 입력칸 */
+  --kb-fs-base: 0.85rem; /* 17px — 본문 */
+  --kb-fs-lg: 0.95rem; /* 19px — 리드 문단, h4 */
+  --kb-fs-xl: 1.05rem; /* 21px — h3, 사이트 이름 */
+  --kb-fs-2xl: 1.35rem; /* 27px — h2 */
+  --kb-fs-3xl: 1.75rem; /* 35px — h1 */
+  --kb-fs-display: 2.5rem; /* 50px — 홈 표지 제목 */
+
+  /* 글자 굵기는 네 단계만 쓴다. 명조는 600이 넘으면 획이 뭉쳐 보여 제목도 600으로 둔다. */
+  --kb-fw-regular: 400;
+  --kb-fw-medium: 500;
+  --kb-fw-semibold: 600;
+  --kb-fw-bold: 700;
+
   --kb-radius-sm: 4px;
-  --kb-radius-md: 6px;
-  --kb-radius-lg: 8px;
+  --kb-radius-md: 8px;
+  --kb-radius-lg: 12px;
 
   --kb-ease: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* 머리 영역의 높이. 사이드바, 기능개선 날짜 열, FAQ 메뉴 열의 고정 위치와
+   * 앵커로 이동했을 때 제목이 멈추는 위치가 이 값을 따른다. */
+  --kb-header-h: 2.8rem; /* 56px */
+  --kb-tabs-h: 2.4rem; /* 48px */
+  --kb-chrome-h: calc(var(--kb-header-h) + var(--kb-tabs-h));
+
 }
 
 /* --- 라이트 -------------------------------------------------------------- */
 [data-md-color-scheme="default"] {
-  --kb-bg: #ffffff;
-  --kb-bg-subtle: #f7f7f8;
-  --kb-text-strong: #181818;
-  --kb-text: #2e2e2e;
-  --kb-text-muted: #6e6e6e;
-  --kb-border: #e5e5e5;
-  --kb-border-strong: #d0d0d0;
-  --kb-hover: #f2f2f2;
-  --kb-active: #ececec;
-  --kb-accent: #0d0d0d;
+  /* 먹색 — 글자와 제목. 크림색 바탕 대비 17 : 1 */
+  --kb-brand: #141413;
+  --kb-brand-strong: #000000;
+  --kb-brand-deep: #1f1e1d;
+  --kb-brand-ink: #1f1e1d; /* 바닥 띠의 면 */
+  --kb-brand-link: #a9502d; /* 링크 — 테라코타를 글자용으로 짙게 낮춘 색(대비 5.6 : 1) */
+  --kb-brand-tint: #ede9de; /* 현재 위치·선택 항목의 바탕(따뜻한 회색) */
+  --kb-brand-wash: #f3f1ea; /* 표 머리, 라벨 칸 */
+  --kb-mark-bg: #c6613f; /* 로고 — 지금은 마우스를 올렸을 때의 색만 쓴다 */
+  --kb-mark-bg-hover: #b4552f;
+  --kb-selection: rgba(217, 119, 87, 0.22);
+
+  /* 테라코타 — 사이트의 유일한 강조색. 다이어그램·차트의 강조 계열이 읽는다 */
+  --kb-gold: #d97757;
+
+  /* 도장 — 강조색과 같은 테라코타 계열 */
+  --kb-seal: #c6613f;
+
+  --kb-bg: #faf9f5;
+  --kb-bg-subtle: #f3f1ea;
+  --kb-text-strong: #141413;
+  --kb-text: #2f2e2b; /* 흰 바탕 대비 12.9 : 1 */
+  --kb-text-muted: #6b6a64; /* 흰 바탕 대비 5.4 : 1 */
+  --kb-text-faint: #a6a49b; /* 장식용. 읽어야 하는 글자에는 쓰지 않는다 */
+  --kb-border: #e8e5da;
+  --kb-border-strong: #d6d2c4;
+  --kb-hover: #f0ede4;
+  --kb-active: #ede9de;
+  --kb-row-hover: #f5f3ec;
+  --kb-marker: #d97757;
+  --kb-accent: var(--kb-brand);
   --kb-accent-contrast: #ffffff;
 
-  /* 알림 상자 의미색.
-   * 프레임워크 기본색(파랑/초록/주황/빨강)을 그대로 갖다 쓰지 않고,
-   * OKLCH 에서 명도 L=0.47 · 채도 C=0.12 를 고정한 채 색상각만 회전시켜 뽑았다.
-   * 네 색이 같은 톤 밴드에 있어 서로 남남이 아니라 한 가족으로 읽힌다.
-   * 흰 배경 대비는 각각 6.8 / 6.5 / 7.0 / 7.3 : 1.
-   * 색은 아이콘과 라벨에만 닿고 배경·테두리는 무채색을 유지한다. */
-  --kb-sem-note: #1f5c9c; /* H 253° */
-  --kb-sem-tip: #1d6c30; /* H 148° */
-  --kb-sem-warn: #824d00; /* H  73° */
-  --kb-sem-danger: #923b33; /* H  28° */
+  --kb-code-bg: #f0ede4;
+  --kb-code-fg: #5a3a2c;
+
+  /* 알림 상자 의미색 — OKLCH 명도·채도를 고정하고 색상각만 돌려 뽑은 한 가족의 색.
+   * 색은 아이콘과 제목에만 닿고, 바탕은 모든 종류가 같은 따뜻한 회색이다.
+   * 상자마다 다른 색 바탕을 깔면 화면이 알록달록해져 격이 떨어진다. */
+  --kb-sem-note: #4d4c48;
+  --kb-sem-tip: #5b7a4c;
+  --kb-sem-warn: #a1661b;
+  --kb-sem-danger: #b4432f;
+  --kb-note-bg: #f5f3ec;
+  --kb-note-line: #e8e5da;
+  --kb-tip-bg: #f5f3ec;
+  --kb-tip-line: #e8e5da;
+  --kb-warn-bg: #f8f1e3;
+  --kb-warn-line: #eadcbf;
+  --kb-danger-bg: #f8ece6;
+  --kb-danger-line: #ecd2c6;
+  --kb-ask-bg: #f5f3ec;
+  --kb-ask-line: #e8e5da;
+
+  /* 다이어그램 — javascripts/pretty-mermaid.js 가 hex 값으로 읽는다 */
+  --kb-diagram-bg: #f5f3ec;
+  --kb-diagram-node: #faf9f5;
+  --kb-diagram-border: #d6d2c4;
+  --kb-diagram-line: #8a877d;
+  --kb-diagram-accent: #c6613f;
+
+  /* 차트 계열색 — javascripts/vegalite.js 가 읽는다.
+   * 1번은 비교의 기준(개선 전, 작년 등)이 오는 자리라 베이지로 옅게, 2번이 테라코타다. */
+  --kb-chart-1: #d8cfbd;
+  --kb-chart-2: #c6613f;
+  --kb-chart-3: #6b6a64;
+  --kb-chart-4: #5b7a4c;
+  --kb-chart-5: #a1661b;
+  --kb-chart-6: #141413;
 
   /* → Material 변수 매핑 */
   --md-default-bg-color: var(--kb-bg);
   --md-default-fg-color: var(--kb-text);
   --md-default-fg-color--light: var(--kb-text-muted);
-  --md-default-fg-color--lighter: #b8b8b8;
+  --md-default-fg-color--lighter: var(--kb-text-faint);
   --md-default-fg-color--lightest: var(--kb-border);
 
   --md-primary-fg-color: var(--kb-bg);
@@ -79,55 +169,104 @@ body {
   --md-primary-bg-color: var(--kb-text-strong);
   --md-primary-bg-color--light: var(--kb-text-muted);
 
-  --md-accent-fg-color: var(--kb-accent);
-  --md-accent-fg-color--transparent: rgba(13, 13, 13, 0.06);
-  --md-accent-bg-color: var(--kb-accent-contrast);
+  --md-accent-fg-color: var(--kb-brand-link);
+  --md-accent-fg-color--transparent: rgba(198, 97, 63, 0.1);
+  --md-accent-bg-color: #ffffff;
+  --md-accent-bg-color--light: rgba(255, 255, 255, 0.7);
 
   --md-typeset-color: var(--kb-text);
-  --md-typeset-a-color: var(--kb-text);
-  --md-typeset-mark-color: rgba(255, 214, 0, 0.35);
+  --md-typeset-a-color: var(--kb-brand-link);
+  --md-typeset-mark-color: rgba(217, 119, 87, 0.28);
+  --md-typeset-table-color: var(--kb-border);
+  --md-typeset-table-color--light: var(--kb-row-hover);
 
   --md-code-bg-color: var(--kb-bg-subtle);
-  --md-code-fg-color: #24292f;
+  --md-code-fg-color: #2f2e2b;
+
+  --md-admonition-fg-color: var(--kb-text);
+  --md-admonition-bg-color: var(--kb-bg-subtle);
 
   --md-footer-bg-color: var(--kb-bg);
-  --md-footer-bg-color--dark: var(--kb-bg);
-  --md-footer-fg-color: var(--kb-text);
-  --md-footer-fg-color--light: var(--kb-text-muted);
-  --md-footer-fg-color--lighter: var(--kb-text-muted);
+  --md-footer-bg-color--dark: var(--kb-brand-ink);
+  --md-footer-fg-color: #faf9f5;
+  --md-footer-fg-color--light: rgba(250, 249, 245, 0.66);
+  --md-footer-fg-color--lighter: rgba(250, 249, 245, 0.45);
 
-  --md-shadow-z1: none;
-  --md-shadow-z2: 0 2px 8px rgba(0, 0, 0, 0.08);
-  --md-shadow-z3: 0 4px 14px rgba(0, 0, 0, 0.12);
+  --md-shadow-z1: 0 1px 2px rgba(20, 20, 19, 0.04);
+  --md-shadow-z2: 0 8px 24px -10px rgba(20, 20, 19, 0.14);
+  --md-shadow-z3: 0 18px 40px -16px rgba(20, 20, 19, 0.2);
 }
 
 /* --- 다크 ---------------------------------------------------------------- */
 [data-md-color-scheme="slate"] {
-  --kb-bg: #0d0d0d;
-  --kb-bg-subtle: #1a1a1a;
-  --kb-text-strong: #f5f5f5;
-  --kb-text: #d4d4d4;
-  --kb-text-muted: #9b9b9b;
-  --kb-border: #2a2a2a;
-  --kb-border-strong: #3d3d3d;
-  --kb-hover: #1f1f1f;
-  --kb-active: #262626;
-  --kb-accent: #ffffff;
-  --kb-accent-contrast: #0d0d0d;
+  /* Claude 의 어두운 화면처럼 따뜻한 숯색 바탕에 크림색 글자, 강조는 같은 테라코타 */
+  --kb-brand: #faf9f5;
+  --kb-brand-strong: #ffffff;
+  --kb-brand-deep: #1a1918;
+  --kb-brand-ink: #1a1918;
+  --kb-brand-link: #e39478;
+  --kb-brand-tint: #34332f;
+  --kb-brand-wash: #2b2a27;
+  --kb-mark-bg: #c6613f;
+  --kb-mark-bg-hover: #d97757;
+  --kb-selection: rgba(217, 119, 87, 0.3);
 
-  /* 라이트와 같은 방식. 어두운 배경에 맞춰 L=0.745 · C=0.09 로 올려 잡았고
-   * 색상각은 동일하다. #0d0d0d 대비 8.3~8.9 : 1. */
-  --kb-sem-note: #82b1e4;
-  --kb-sem-tip: #87bc8a;
-  --kb-sem-warn: #d0a36c;
-  --kb-sem-danger: #e0968e;
+  --kb-gold: #d97757;
 
-  --md-hue: 0; /* Material 기본 slate의 푸른 색조 제거 */
+  --kb-seal: #e0806a;
+
+  --kb-bg: #262624;
+  --kb-bg-subtle: #2b2a27;
+  --kb-text-strong: #faf9f5;
+  --kb-text: #e3e0d8;
+  --kb-text-muted: #a8a59c;
+  --kb-text-faint: #75736c;
+  --kb-border: #3a3935;
+  --kb-border-strong: #4a4843;
+  --kb-hover: #302f2c;
+  --kb-active: #34332f;
+  --kb-row-hover: #2a2927;
+  --kb-marker: #d97757;
+  --kb-accent: var(--kb-brand);
+  --kb-accent-contrast: #121418;
+
+  --kb-code-bg: #33322e;
+  --kb-code-fg: #f0c9b8;
+
+  --kb-sem-note: #d6d2c6;
+  --kb-sem-tip: #a3c08f;
+  --kb-sem-warn: #dcae6a;
+  --kb-sem-danger: #e8907a;
+  --kb-note-bg: #2b2a27;
+  --kb-note-line: #3a3935;
+  --kb-tip-bg: #2b2a27;
+  --kb-tip-line: #3a3935;
+  --kb-warn-bg: #302a20;
+  --kb-warn-line: #4a3f2b;
+  --kb-danger-bg: #322522;
+  --kb-danger-line: #4d332c;
+  --kb-ask-bg: #2b2a27;
+  --kb-ask-line: #3a3935;
+
+  --kb-diagram-bg: #2b2a27;
+  --kb-diagram-node: #302f2c;
+  --kb-diagram-border: #57554f;
+  --kb-diagram-line: #a8a59c;
+  --kb-diagram-accent: #d97757;
+
+  --kb-chart-1: #5c5850;
+  --kb-chart-2: #d97757;
+  --kb-chart-3: #a8a59c;
+  --kb-chart-4: #a3c08f;
+  --kb-chart-5: #dcae6a;
+  --kb-chart-6: #faf9f5;
+
+  --md-hue: 40;
 
   --md-default-bg-color: var(--kb-bg);
   --md-default-fg-color: var(--kb-text);
   --md-default-fg-color--light: var(--kb-text-muted);
-  --md-default-fg-color--lighter: #6a6a6a;
+  --md-default-fg-color--lighter: var(--kb-text-faint);
   --md-default-fg-color--lightest: var(--kb-border);
 
   --md-primary-fg-color: var(--kb-bg);
@@ -136,26 +275,32 @@ body {
   --md-primary-bg-color: var(--kb-text-strong);
   --md-primary-bg-color--light: var(--kb-text-muted);
 
-  --md-accent-fg-color: var(--kb-accent);
-  --md-accent-fg-color--transparent: rgba(255, 255, 255, 0.08);
-  --md-accent-bg-color: var(--kb-accent-contrast);
+  --md-accent-fg-color: var(--kb-brand-link);
+  --md-accent-fg-color--transparent: rgba(217, 119, 87, 0.12);
+  --md-accent-bg-color: #262624;
+  --md-accent-bg-color--light: rgba(38, 38, 36, 0.7);
 
   --md-typeset-color: var(--kb-text);
-  --md-typeset-a-color: var(--kb-text);
-  --md-typeset-mark-color: rgba(255, 214, 0, 0.25);
+  --md-typeset-a-color: var(--kb-brand-link);
+  --md-typeset-mark-color: rgba(217, 119, 87, 0.3);
+  --md-typeset-table-color: var(--kb-border);
+  --md-typeset-table-color--light: var(--kb-row-hover);
 
   --md-code-bg-color: var(--kb-bg-subtle);
-  --md-code-fg-color: #d4d4d4;
+  --md-code-fg-color: #e3e0d8;
+
+  --md-admonition-fg-color: var(--kb-text);
+  --md-admonition-bg-color: var(--kb-bg-subtle);
 
   --md-footer-bg-color: var(--kb-bg);
-  --md-footer-bg-color--dark: var(--kb-bg);
-  --md-footer-fg-color: var(--kb-text);
-  --md-footer-fg-color--light: var(--kb-text-muted);
-  --md-footer-fg-color--lighter: var(--kb-text-muted);
+  --md-footer-bg-color--dark: var(--kb-brand-ink);
+  --md-footer-fg-color: #ffffff;
+  --md-footer-fg-color--light: rgba(255, 255, 255, 0.62);
+  --md-footer-fg-color--lighter: rgba(255, 255, 255, 0.42);
 
-  --md-shadow-z1: none;
-  --md-shadow-z2: 0 2px 8px rgba(0, 0, 0, 0.32);
-  --md-shadow-z3: 0 4px 14px rgba(0, 0, 0, 0.48);
+  --md-shadow-z1: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --md-shadow-z2: 0 8px 24px -10px rgba(0, 0, 0, 0.55);
+  --md-shadow-z3: 0 18px 40px -16px rgba(0, 0, 0, 0.65);
 }
 
 /* ---------------------------------------------------------------------------
@@ -180,18 +325,20 @@ html {
 
 body {
   background-color: var(--kb-bg);
+  font-kerning: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 /* 한글 최적화
-   · line-height 1.75 — 한글은 x-height가 커서 라틴 기준 1.6이면 답답하다
+   · font-size 17px — 50대 이상 독자를 기준으로 16px에서 한 단계 올렸다
+   · line-height 1.8 — 한글은 x-height가 커서 라틴 기준 1.6이면 답답하다
    · word-break: keep-all — 어절 중간에서 줄바꿈되는 것을 막는다 (한글 필수)
-   · letter-spacing -0.003em — 제목용 -0.02em을 본문에 쓰면 글자가 붙어 보인다 */
+   · letter-spacing -0.008em — 제목용 -0.02em을 본문에 쓰면 글자가 붙어 보인다 */
 .md-typeset {
-  font-size: 0.8rem; /* 16px */
-  line-height: 1.75;
-  letter-spacing: -0.003em;
+  font-size: var(--kb-fs-base);
+  line-height: 1.8;
+  letter-spacing: -0.008em;
   word-break: keep-all;
   overflow-wrap: break-word;
 }
@@ -234,23 +381,26 @@ body {
 .md-main__inner {
   /* Material 기본 height: 100%와 아래 margin이 합쳐져 부모 높이를 넘지 않게 한다. */
   height: auto;
-  margin-top: 1.2rem;
+  margin-top: 1.4rem;
 }
 
 .md-content__inner {
-  margin-bottom: 3rem;
-  padding-top: 0.4rem;
+  margin-bottom: 3.2rem;
+  padding-top: 0.2rem;
 }
 
 /* 본문 열은 한 줄이 지나치게 길어지지 않게 상한을 두고 남는 공간에서 가운데 정렬한다.
- * 한글은 글자폭이 넓어 1240px 정도가 상한선이다.
+ * 17px 본문에서 한 줄이 60자 안팎이 되는 1120px 을 상한으로 둔다.
  *
  * Material이 아래 선택자를 (0,5,0) 특이도로 선언해 margin-left/right: 1.2rem 을 고정하므로
- * 같은 길이의 선택자로 맞춰야 auto 마진이 먹는다. */
+ * 같은 길이의 선택자로 맞춰야 auto 마진이 먹는다. 경로(breadcrumb)도 같은 폭으로 맞춰
+ * 본문과 같은 세로선에서 시작하게 한다. */
 @media screen and (min-width: 76.25em) {
   [dir="ltr"] .md-sidebar--primary:not([hidden]) ~ .md-content > .md-content__inner,
-  [dir="ltr"] .md-sidebar--secondary:not([hidden]) ~ .md-content > .md-content__inner {
-    max-width: 62rem; /* 1240px */
+  [dir="ltr"] .md-sidebar--secondary:not([hidden]) ~ .md-content > .md-content__inner,
+  [dir="ltr"] .md-sidebar--primary:not([hidden]) ~ .md-content > .md-path,
+  [dir="ltr"] .md-sidebar--secondary:not([hidden]) ~ .md-content > .md-path {
+    max-width: 56rem;
     margin-left: auto;
     margin-right: auto;
   }
@@ -260,13 +410,34 @@ body {
   height: 0; /* Material 기본 상단 여백 제거 — 아래에서 직접 제어 */
 }
 
-/* 사이드바와 본문 사이 세로 구분선 제거 (참고 사이트의 여백감) */
+/* 사이드바와 본문 사이 세로 구분선 제거 */
 .md-sidebar--primary {
   border-right: none;
 }
 
 .md-sidebar__scrollwrap {
   scrollbar-width: thin;
+}
+
+/* 머리 영역이 Material 기본값(헤더 2.4rem + 탭바 2.4rem)보다 높으므로
+ * 사이드바가 붙는 위치와 앵커로 이동했을 때 제목이 멈추는 위치를 함께 내린다.
+ * 탭바는 76.25em 이상에서만 보이므로 그보다 좁으면 헤더 높이만 쓴다. */
+.md-header--lifted ~ .md-container .md-sidebar {
+  top: var(--kb-header-h);
+}
+
+.md-header--lifted ~ .md-container .md-typeset :target {
+  --md-scroll-margin: calc(var(--kb-header-h) + 1.2rem);
+}
+
+@media screen and (min-width: 76.25em) {
+  .md-header--lifted ~ .md-container .md-sidebar {
+    top: var(--kb-chrome-h);
+  }
+
+  .md-header--lifted ~ .md-container .md-typeset :target {
+    --md-scroll-margin: calc(var(--kb-chrome-h) + 1.2rem);
+  }
 }
 
 /* ---------------------------------------------------------------------------
@@ -286,45 +457,82 @@ body {
   transition: none;
 }
 
+.md-header__inner {
+  height: var(--kb-header-h);
+}
+
 .md-header__title {
-  font-size: 0.78rem;
-  font-weight: 600;
-  letter-spacing: -0.012em;
-  margin-left: 0.4rem;
+  height: var(--kb-header-h);
+  line-height: var(--kb-header-h);
+  font-size: var(--kb-fs-md);
 }
 
+[dir="ltr"] .md-header__title {
+  margin-left: 0.35rem;
+}
+
+/* 사이트 이름 — 명조 워드마크 */
 .md-header__topic:first-child {
-  font-weight: 600;
-}
-
-.md-header__button {
+  font-family: var(--kb-font-serif);
+  font-size: var(--kb-fs-xl);
+  font-weight: var(--kb-fw-semibold);
+  letter-spacing: -0.02em;
   color: var(--kb-text-strong);
 }
 
+/* 스크롤하면 사이트 이름 자리에 나타나는 문서 제목 */
+.md-header__topic + .md-header__topic {
+  font-size: var(--kb-fs-md);
+  font-weight: var(--kb-fw-semibold);
+  letter-spacing: -0.012em;
+  color: var(--kb-text-strong);
+}
+
+.md-header__button {
+  color: var(--kb-text-muted);
+}
+
 .md-header__button:hover {
-  opacity: 0.65;
+  color: var(--kb-brand);
+  opacity: 1;
+}
+
+/* 로고 — 테라코타로 채운 메모지에 체크 표시를 비워 낸 모양("적고, 처리한다").
+ * 타일 없이 바탕 위에 바로 놓고 명조 워드마크와 짝을 이룬다.
+ * overrides/.icons/custom/logo.svg 는 currentColor 로 채워지므로 글자색만 정한다.
+ * 홈 표지 그림의 체크 표시와 같은 표시라 사이트 전체가 한 가지 상징으로 읽힌다. */
+.md-header__button.md-logo {
+  margin: 0 0 0 0.1rem;
+  padding: 0.2rem;
+  background: none;
+  color: var(--kb-gold);
+  transition: color 0.15s var(--kb-ease);
+}
+
+.md-header__button.md-logo:hover {
+  background: none;
+  color: var(--kb-mark-bg-hover);
 }
 
 .md-header__button.md-logo :is(img, svg),
 .md-nav__button.md-logo :is(img, svg) {
-  height: 1.35rem;
-  width: 1.35rem;
   display: block;
+  width: 1.55rem;
+  height: 1.55rem;
 }
 
 .md-header__button.md-logo svg,
 .md-nav__button.md-logo svg {
-  fill: none;
-  stroke: currentColor;
+  fill: currentColor;
+  stroke: none;
 }
 
-/* 검색창 — 다른 입력 요소와 같은 작은 모서리 */
+/* 검색창 */
 .md-search__form {
   background-color: var(--kb-bg-subtle);
   border: 1px solid var(--kb-border);
   border-radius: var(--kb-radius-md);
   box-shadow: none;
-  height: 1.7rem;
   transition: background-color 0.15s var(--kb-ease), border-color 0.15s var(--kb-ease);
 }
 
@@ -335,13 +543,19 @@ body {
 
 [data-md-toggle="search"]:checked ~ .md-header .md-search__form {
   background-color: var(--kb-bg);
-  border-color: var(--kb-border-strong);
-  border-radius: var(--kb-radius-lg) var(--kb-radius-lg) 0 0;
-  box-shadow: var(--md-shadow-z2);
+  border-color: var(--kb-brand-link);
+  border-radius: var(--kb-radius-md) var(--kb-radius-md) 0 0;
+  box-shadow: 0 0 0 3px var(--md-accent-fg-color--transparent);
+}
+
+@media screen and (min-width: 60em) {
+  .md-search__inner {
+    width: 13rem;
+  }
 }
 
 .md-search__input {
-  font-size: 0.7rem;
+  font-size: var(--kb-fs-sm);
   color: var(--kb-text);
 }
 
@@ -360,13 +574,13 @@ body {
 
 .md-search__output {
   border-radius: 0 0 var(--kb-radius-lg) var(--kb-radius-lg);
-  box-shadow: var(--md-shadow-z2);
+  box-shadow: var(--md-shadow-z3);
 }
 
 .md-search-result__meta {
-  background-color: var(--kb-bg-subtle);
+  background-color: var(--kb-brand-wash);
   color: var(--kb-text-muted);
-  font-size: 0.68rem;
+  font-size: var(--kb-fs-xs);
   line-height: 1.8rem;
   padding: 0 0.8rem;
 }
@@ -384,7 +598,7 @@ body {
 
 /* 검색 결과 내 본문 전체 기본 폰트 크기 통일 */
 .md-search-result .md-typeset {
-  font-size: 0.72rem;
+  font-size: var(--kb-fs-sm);
   line-height: 1.55;
   color: var(--kb-text-muted);
 }
@@ -392,8 +606,9 @@ body {
 /* 문서 메인 제목(h1) 폰트 */
 .md-search-result__article--document .md-search-result__title,
 .md-search-result .md-typeset h1 {
-  font-size: 0.82rem !important;
-  font-weight: 600 !important;
+  font-family: var(--md-text-font-family) !important;
+  font-size: var(--kb-fs-md) !important;
+  font-weight: var(--kb-fw-bold) !important;
   line-height: 1.4 !important;
   color: var(--kb-text-strong) !important;
   margin: 0.35rem 0 0.2rem !important;
@@ -405,8 +620,9 @@ body {
 .md-search-result .md-typeset h2,
 .md-search-result .md-typeset h3,
 .md-search-result .md-typeset h4 {
-  font-size: 0.76rem !important;
-  font-weight: 600 !important;
+  font-family: var(--md-text-font-family) !important;
+  font-size: var(--kb-fs-sm) !important;
+  font-weight: var(--kb-fw-semibold) !important;
   line-height: 1.4 !important;
   color: var(--kb-text) !important;
   margin: 0.25rem 0 0.15rem !important;
@@ -419,7 +635,7 @@ body {
 .md-search-result .md-typeset ol,
 .md-search-result .md-typeset li,
 .md-search-result__teaser {
-  font-size: 0.72rem !important;
+  font-size: var(--kb-fs-sm) !important;
   line-height: 1.5 !important;
   color: var(--kb-text-muted) !important;
   margin: 0 0 0.35rem !important;
@@ -427,8 +643,8 @@ body {
 
 /* "이 문서에서 N개의 검색 결과 더 보기" 링크 폰트 */
 .md-search-result__more > summary > div {
-  font-size: 0.72rem;
-  color: var(--kb-accent);
+  font-size: var(--kb-fs-sm);
+  color: var(--kb-brand-link);
   padding: 0.45rem 0.8rem;
 }
 
@@ -438,16 +654,15 @@ body {
   }
 }
 
-/* 일치하는 검색어 하이라이트 */
+/* 일치하는 검색어 하이라이트 — 본문의 <mark> 와 같은 형광펜(8절)에 굵은 글씨만 더한다 */
 .md-search-result mark {
-  color: var(--kb-accent);
-  font-weight: 600;
-  background-color: transparent;
-  text-decoration: underline;
+  color: var(--kb-text-strong);
+  font-weight: var(--kb-fw-bold);
+  text-decoration: none;
 }
 
 /* ---------------------------------------------------------------------------
- * 5. 상단 탭바
+ * 5. 상단 탭바 / 경로
  * ------------------------------------------------------------------------- */
 
 /* 높이를 height:100% 로 흘려보내면 안 된다.
@@ -455,11 +670,10 @@ body {
  * 100%가 auto로 무너진다. 그러면 아이템은 Material 기본 2.4rem 을 유지한 채
  * 더 낮은 .md-tabs 밖으로 넘치고, 글자는 띠 위쪽에 붙는다. 각 단계에 높이를 준다. */
 .md-tabs {
-  background-color: var(--kb-bg-subtle);
+  background-color: var(--kb-bg);
   color: var(--kb-text-muted);
-  border-bottom: 1px solid var(--kb-border);
   box-shadow: none;
-  height: 2.4rem;
+  height: var(--kb-tabs-h);
   overflow-x: auto;
   overflow-y: hidden;
 }
@@ -488,35 +702,58 @@ body {
 /* 활성 탭 밑줄은 링크의 border-bottom 으로 그린다.
  * 절대 위치 ::after 는 기준 박스가 어긋나면 글자 바로 아래에 떠버린다.
  * 링크를 아이템 높이만큼 늘리고 아래 테두리를 쓰면 위치가 확정되고,
- * 밑줄 너비도 글자 폭과 정확히 같아진다. */
+ * 밑줄 너비도 글자 폭과 정확히 같아진다. 위에도 같은 두께를 비워 글자를 띠의 한가운데에 앉힌다. */
 .md-tabs__link {
   display: flex;
   align-items: center;
   height: 100%;
   box-sizing: border-box;
-  border-bottom: 2px solid transparent;
+  border-top: 3px solid transparent;
+  border-bottom: 3px solid transparent;
   margin-top: 0;
-  font-size: 0.7rem;
-  font-weight: 500;
-  letter-spacing: -0.005em;
+  font-size: var(--kb-fs-sm);
+  font-weight: var(--kb-fw-semibold);
+  letter-spacing: -0.01em;
   opacity: 1;
   color: var(--kb-text-muted);
   transition: color 0.15s var(--kb-ease), border-color 0.15s var(--kb-ease);
 }
 
-.md-tabs__item--active .md-tabs__link {
-  border-bottom-color: var(--kb-accent);
-}
-
 .md-tabs__link:hover {
-  color: var(--kb-text);
+  color: var(--kb-text-strong);
   opacity: 1;
 }
 
 .md-tabs__item--active .md-tabs__link {
   color: var(--kb-text-strong);
-  font-weight: 600;
+  border-bottom-color: var(--kb-text-strong);
+  font-weight: var(--kb-fw-bold);
   opacity: 1;
+}
+
+/* 경로(navigation.path) — 제목 위에서 지금 읽는 문서가 어느 갈래에 있는지 알려 준다 */
+.md-path {
+  font-size: var(--kb-fs-xs);
+  padding-top: 0;
+  margin-bottom: 0.5rem;
+}
+
+.md-path__list {
+  gap: 0.15rem;
+}
+
+.md-path__link {
+  color: var(--kb-text-muted);
+  transition: color 0.12s var(--kb-ease);
+}
+
+.md-path__link:focus,
+.md-path__link:hover {
+  color: var(--kb-brand-link);
+}
+
+.md-path__item:not(:first-child)::before {
+  background-color: var(--kb-text-faint);
 }
 
 /* ---------------------------------------------------------------------------
@@ -524,13 +761,13 @@ body {
  * ------------------------------------------------------------------------- */
 
 .md-nav {
-  font-size: 0.7rem; /* 14px */
+  font-size: var(--kb-fs-sm); /* 14.4px */
   line-height: 1.5;
 }
 
 .md-nav--primary .md-nav__title {
-  font-size: 0.7rem;
-  font-weight: 600;
+  font-size: var(--kb-fs-sm);
+  font-weight: var(--kb-fw-bold);
   color: var(--kb-text-strong);
   box-shadow: none;
   background-color: transparent;
@@ -544,8 +781,8 @@ body {
   display: flex;
   align-items: center;
   gap: 0.3rem;
-  margin: 0.05rem 0;
-  padding: 0.26rem 0.45rem;
+  margin: 0.08rem 0;
+  padding: 0.32rem 0.6rem;
   border-radius: var(--kb-radius-md);
   color: var(--kb-text-muted);
   transition: background-color 0.12s var(--kb-ease), color 0.12s var(--kb-ease);
@@ -553,19 +790,19 @@ body {
 
 .md-sidebar--primary .md-nav__link:hover {
   background-color: var(--kb-hover);
-  color: var(--kb-text);
+  color: var(--kb-text-strong);
 }
 
 .md-sidebar--primary .md-nav__link:focus {
   color: var(--kb-text);
 }
 
-/* 활성 항목 — 연회색 배경으로 현재 위치 표시 */
+/* 활성 항목 — 먹색 글자와 옅은 베이지 바탕으로 현재 위치 표시 */
 .md-sidebar--primary .md-nav__link--active,
 .md-sidebar--primary .md-nav__link--active:hover {
-  background-color: var(--kb-active);
+  background-color: var(--kb-brand-tint);
   color: var(--kb-text-strong);
-  font-weight: 500;
+  font-weight: var(--kb-fw-semibold);
 }
 
 /* 섹션 라벨은 알약이 아니라 굵은 소제목으로.
@@ -573,14 +810,14 @@ body {
 .md-sidebar--primary .md-nav__item--section > .md-nav__link {
   background-color: transparent;
   color: var(--kb-text-strong);
-  font-weight: 600;
+  font-weight: var(--kb-fw-bold);
   padding-left: 0;
   padding-right: 0;
 }
 
 /* navigation.indexes 로 섹션 자체가 링크가 되면 .md-nav__container 안에 <a>가
  * 한 겹 더 생긴다. 이 안쪽 링크가 다시 패딩을 갖지 않도록 눌러서
- * 라벨형 섹션(업무 프로세스)과 링크형 섹션(업무지식)의 글자 시작점을 일치시킨다. */
+ * 라벨형 섹션과 링크형 섹션의 글자 시작점을 일치시킨다. */
 .md-sidebar--primary .md-nav__container > .md-nav__link {
   padding: 0;
   background-color: transparent;
@@ -588,8 +825,20 @@ body {
   font-weight: inherit;
 }
 
+/* 섹션의 개요 문서(index.md)를 읽는 중이면 섹션 이름에 옅은 밑줄을 그어 현재 위치를 알린다.
+ * 섹션 이름은 바탕과 왼쪽 표시선이 없는 소제목이므로 활성 항목의 바탕·선을 걷는다. */
+.md-sidebar--primary .md-nav__container > .md-nav__link.md-nav__link--active {
+  background-color: transparent;
+  box-shadow: none;
+  color: var(--kb-text-strong);
+  text-decoration: underline;
+  text-decoration-color: var(--kb-border-strong);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.35em;
+}
+
 .md-sidebar--primary .md-nav__item--section {
-  margin: 1rem 0 0.2rem;
+  margin: 1.1rem 0 0.2rem;
 }
 
 .md-sidebar--primary .md-nav__item--section:first-child {
@@ -604,14 +853,14 @@ body {
  * Material이 (0,6,0) 특이도로 선언하므로 여기서도 같은 길이로 맞춰야 이긴다. */
 .md-sidebar--primary .md-nav__item--section > .md-nav {
   margin-left: 0;
-  margin-top: 0.1rem;
+  margin-top: 0.15rem;
 }
 
 .md-sidebar--primary .md-nav--lifted > .md-nav__list > .md-nav__item > .md-nav:not(.md-nav--secondary) {
   margin-left: 0;
 }
 
-/* 하위 항목은 링크 자체의 좌측 패딩(0.45rem)만큼만 섹션 라벨보다 들어간다 */
+/* 하위 항목은 링크 자체의 좌측 패딩(0.6rem)만큼만 섹션 라벨보다 들어간다 */
 .md-sidebar--primary .md-nav .md-nav .md-nav__list {
   padding-left: 0;
 }
@@ -621,37 +870,59 @@ body {
  * ------------------------------------------------------------------------- */
 
 .md-sidebar--secondary .md-nav__title {
-  font-size: 0.62rem;
-  font-weight: 600;
+  font-size: var(--kb-fs-xs);
+  font-weight: var(--kb-fw-bold);
   letter-spacing: 0;
   text-transform: none;
   color: var(--kb-text-strong);
-  padding-bottom: 0.4rem;
+  padding-bottom: 0.5rem;
+}
+
+/* 목록 전체의 왼쪽에 가는 세로선 하나(레일)를 긋고, 지금 읽는 절의 링크만
+ * 그 위에 테라코타 선을 덧칠한다. 장 사이의 간격(Material이 하위 목록 아래에 두는 여백)이
+ * 있어도 레일은 끊기지 않는다. 레일과 링크가 같은 세로선에 오도록 Material의 항목 여백과
+ * 하위 목록의 들여쓰기를 걷고, 들여쓰기는 글자의 안쪽 여백으로만 만든다.
+ * Material이 목록 들여쓰기를 (0,3,0) 특이도로 선언하므로 같은 길이로 맞춘다. */
+[dir="ltr"] .md-sidebar--secondary .md-nav__list {
+  padding-left: 0;
+}
+
+.md-sidebar--secondary .md-nav--secondary > .md-nav__list {
+  border-left: 2px solid var(--kb-border);
+}
+
+.md-sidebar--secondary .md-nav__item {
+  padding: 0;
+}
+
+.md-sidebar--secondary .md-nav__list .md-nav {
+  margin: 0;
 }
 
 .md-sidebar--secondary .md-nav__link {
   display: block;
-  padding: 0.22rem 0 0.22rem 0.5rem;
-  margin-left: -1px;
+  margin: 0 0 0 -2px;
+  padding: 0.26rem 0 0.26rem 0.75rem;
   border-left: 2px solid transparent;
   color: var(--kb-text-muted);
+  font-size: var(--kb-fs-xs);
+  line-height: 1.5;
   transition: color 0.12s var(--kb-ease), border-color 0.12s var(--kb-ease);
 }
 
 .md-sidebar--secondary .md-nav__link:hover {
-  color: var(--kb-text);
+  color: var(--kb-text-strong);
 }
 
-/* 활성 항목 — 좌측 세로 바 */
 .md-sidebar--secondary .md-nav__link--active,
 .md-sidebar--secondary .md-nav__link--active:hover {
-  border-left-color: var(--kb-accent);
+  border-left-color: var(--kb-text-strong);
   color: var(--kb-text-strong);
-  font-weight: 500;
+  font-weight: var(--kb-fw-semibold);
 }
 
 .md-sidebar--secondary .md-nav__list .md-nav__list .md-nav__link {
-  padding-left: 1rem;
+  padding-left: 1.4rem;
 }
 
 /* ---------------------------------------------------------------------------
@@ -665,42 +936,52 @@ body {
 .md-typeset h5,
 .md-typeset h6 {
   color: var(--kb-text-strong);
-  font-weight: 600;
+  font-weight: var(--kb-fw-bold);
   letter-spacing: -0.02em;
 }
 
+/* 문서 제목과 장 제목은 명조 — 인쇄된 보고서의 표제처럼 읽힌다.
+ * 절(h3) 이하는 화면 요소와 같은 고딕으로 두어 위계가 글꼴로도 갈린다. */
+.md-typeset h1,
+.md-typeset h2 {
+  font-family: var(--kb-font-serif);
+  font-weight: var(--kb-fw-semibold);
+}
+
 .md-typeset h1 {
-  font-size: 1.6rem; /* 32px */
-  line-height: 1.35;
-  margin: 0 0 0.5rem;
+  font-size: var(--kb-fs-3xl); /* 37px */
+  line-height: 1.32;
+  letter-spacing: -0.03em;
+  margin: 0.2rem 0 0.9rem;
 }
 
 .md-typeset h2 {
-  font-size: 1.2rem; /* 24px */
+  font-size: var(--kb-fs-2xl); /* 26px */
   line-height: 1.4;
-  margin: 2.2rem 0 0.7rem;
+  letter-spacing: -0.025em;
+  margin: 2.6rem 0 0.9rem;
 }
 
 .md-typeset h3 {
-  font-size: 1rem; /* 20px */
+  font-size: var(--kb-fs-xl); /* 20px */
   line-height: 1.5;
-  margin: 1.6rem 0 0.5rem;
-  letter-spacing: -0.015em;
+  margin: 2rem 0 0.6rem;
+  letter-spacing: -0.018em;
 }
 
 .md-typeset h4 {
-  font-size: 0.85rem; /* 17px */
+  font-size: var(--kb-fs-lg); /* 17.6px */
   line-height: 1.55;
-  margin: 1.2rem 0 0.4rem;
-  letter-spacing: -0.01em;
+  margin: 1.4rem 0 0.45rem;
+  letter-spacing: -0.012em;
 }
 
 .md-typeset h5,
 .md-typeset h6 {
-  font-size: 0.76rem;
+  font-size: var(--kb-fs-md);
   text-transform: none;
   color: var(--kb-text);
-  margin: 1rem 0 0.3rem;
+  margin: 1.1rem 0 0.35rem;
 }
 
 .md-typeset h1 + p,
@@ -713,19 +994,70 @@ body {
   margin: 0 0 1rem;
 }
 
-/* 제목 바로 아래 첫 문단을 리드 문단으로 (참고 사이트의 부제 스타일) */
-.md-typeset h1 + p:first-of-type {
-  font-size: 0.88rem;
+/* 절 번호 — javascripts/site.js 가 "1." "1.1" 같은 머리 번호를 감싼다.
+ * 번호는 제목과 같은 글꼴로 두고 색만 한 단계 옅게 해, 제목 글자보다 앞으로 나서지 않게 한다. */
+.md-typeset .kb-num {
   color: var(--kb-text-muted);
-  line-height: 1.65;
-  margin-bottom: 1.6rem;
+  font-variant-numeric: tabular-nums lining-nums;
+  margin-right: 0.3em;
 }
 
-/* 링크 — 강조색 없이 본문색 + 밑줄 */
-.md-typeset a {
+.md-sidebar--secondary .kb-num {
+  color: var(--kb-text-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.md-sidebar--secondary .md-nav__link--active .kb-num {
+  color: inherit;
+}
+
+/* 문서 머리의 작성일·최종 수정일 — 제목 바로 아래 목록을 판권면처럼 한 줄로 늘어놓는다.
+ * 작성 가이드 1.2절에 따라 모든 콘텐츠 문서의 H1 바로 아래에는
+ * "- **작성일**: …" 목록이 있다. 굵은 라벨로 시작하는 목록일 때만 적용한다. */
+.md-typeset h1 + ul:has(> li:first-child > strong:first-child) {
+  display: flex;
+  flex-wrap: wrap;
+  row-gap: 0.2rem;
+  margin: 0 0 1.4rem;
+  padding: 0;
+  list-style: none;
+}
+
+.md-typeset h1 + ul:has(> li:first-child > strong:first-child) > li {
+  margin: 0;
+  padding: 0 0.85rem;
+  border-left: 1px solid var(--kb-border-strong);
+  color: var(--kb-text-muted);
+  font-size: var(--kb-fs-xs);
+  line-height: 1.3;
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.md-typeset h1 + ul:has(> li:first-child > strong:first-child) > li:first-child {
+  padding-left: 0;
+  border-left: none;
+}
+
+.md-typeset h1 + ul:has(> li:first-child > strong:first-child) > li > strong {
   color: var(--kb-text);
+  font-weight: var(--kb-fw-semibold);
+}
+
+/* 제목 아래 첫 문단은 문서의 한 문장 요약(작성 가이드 1.1절) — 리드 문단으로 키운다 */
+.md-typeset h1 + p,
+.md-typeset h1 + ul + p {
+  font-size: var(--kb-fs-lg);
+  line-height: 1.8;
+  color: var(--kb-text-muted);
+  margin-bottom: 2rem;
+}
+
+/* 링크 — 테라코타 글자와 옅은 밑줄. 마우스를 올리면 밑줄이 진해진다 */
+.md-typeset a {
+  color: var(--kb-brand-link);
   text-decoration: underline;
-  text-underline-offset: 0.18em;
+  text-underline-offset: 0.22em;
   text-decoration-thickness: 1px;
   text-decoration-color: var(--kb-border-strong);
   transition: color 0.12s var(--kb-ease), text-decoration-color 0.12s var(--kb-ease);
@@ -733,8 +1065,8 @@ body {
 
 .md-typeset a:hover,
 .md-typeset a:focus {
-  color: var(--kb-accent);
-  text-decoration-color: var(--kb-accent);
+  color: var(--kb-brand-strong);
+  text-decoration-color: currentColor;
 }
 
 /* 밑줄을 붙이면 안 되는 링크들 */
@@ -759,16 +1091,28 @@ body {
 }
 
 .md-typeset li {
-  margin-bottom: 0.3rem;
+  margin-bottom: 0.35rem;
 }
 
 .md-typeset li::marker {
-  color: var(--kb-text-muted);
+  color: var(--kb-text-faint);
 }
 
+.md-typeset ol > li::marker {
+  color: var(--kb-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 장 사이의 구분선 — 가는 선 하나 */
 .md-typeset hr {
-  border-bottom: 1px solid var(--kb-border);
-  margin: 2rem 0;
+  height: 0;
+  margin: 3rem 0 0;
+  border: none;
+  border-top: 1px solid var(--kb-border);
+}
+
+.md-typeset hr + h2 {
+  margin-top: 1.1rem;
 }
 
 .md-typeset blockquote {
@@ -778,8 +1122,48 @@ body {
   margin-left: 0;
 }
 
+/* 형광펜 — 글자 아래 절반만 칠해 실제 형광펜으로 그은 것처럼 보이게 한다.
+ * 작성 가이드 2.8절의 <mark> 강조가 이 모양으로 나온다. */
+.md-typeset mark {
+  padding: 0 0.12em;
+  margin: 0 0.02em;
+  border-radius: 2px;
+  background: linear-gradient(to bottom, transparent 52%, var(--md-typeset-mark-color) 52%);
+  color: inherit;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+/* 질문지 답변 출처(<small>(질문지 … · Q-…)</small>) 같은 보조 표기 */
+.md-typeset small {
+  color: var(--kb-text-muted);
+  font-size: 0.8em;
+}
+
+/* 출처 줄 — javascripts/site.js 가 "출처:"로 시작하는 문단에 붙인다.
+ * 절마다 끝에 오는 근거 표기라 글자를 작고 옅게 해 본문보다 한 단계 낮춘다. */
+.md-typeset p.kb-source {
+  margin: 0.6rem 0 1.4rem;
+  padding-top: 0;
+  border-top: none;
+  color: var(--kb-text-muted);
+  font-size: var(--kb-fs-xs);
+  line-height: 1.7;
+}
+
+.md-typeset .kb-source__label {
+  margin-right: 0.3em;
+  color: var(--kb-text);
+  font-weight: var(--kb-fw-bold);
+}
+
+/* 출처 줄은 이미 작은 글자(14px)라 파일 경로를 더 줄이지 않는다 */
+.md-typeset p.kb-source code {
+  font-size: 1em;
+}
+
 .md-typeset img {
-  border-radius: 0;
+  border-radius: var(--kb-radius-md);
   border: 1px solid var(--kb-border);
 }
 
@@ -787,23 +1171,27 @@ body {
  * 9. 콘텐츠 컴포넌트
  * ------------------------------------------------------------------------- */
 
-/* --- 코드 ---------------------------------------------------------------- */
+/* --- 코드 ----------------------------------------------------------------
+ * 인라인 코드는 이 사이트에서 주로 원본 파일 경로를 적는 데 쓴다.
+ * 옅은 베이지 칩으로 두어 본문 속에서 "자료 이름"이 바로 눈에 띄게 한다. */
 .md-typeset code {
-  background-color: var(--kb-bg-subtle);
-  color: var(--kb-text-strong);
-  border-radius: var(--kb-radius-sm);
-  padding: 0.12em 0.34em;
-  font-size: 0.85em;
+  background-color: var(--kb-code-bg);
+  color: var(--kb-code-fg);
+  border-radius: 5px;
+  padding: 0.1em 0.38em;
+  font-size: 0.86em;
+  letter-spacing: 0;
   box-shadow: none;
 }
 
 .md-typeset pre > code {
   background-color: var(--kb-bg-subtle);
+  color: var(--md-code-fg-color);
   border: 1px solid var(--kb-border);
   border-radius: var(--kb-radius-md);
-  padding: 0.8rem 0.9rem;
-  font-size: 0.7rem;
-  line-height: 1.65;
+  padding: 0.85rem 1rem;
+  font-size: var(--kb-fs-xs);
+  line-height: 1.7;
 }
 
 .md-typeset .highlight {
@@ -811,13 +1199,13 @@ body {
 }
 
 .md-typeset .highlight .filename {
-  background-color: var(--kb-bg-subtle);
+  background-color: var(--kb-brand-wash);
   border: 1px solid var(--kb-border);
   border-bottom: none;
   border-radius: var(--kb-radius-md) var(--kb-radius-md) 0 0;
   color: var(--kb-text-muted);
-  font-size: 0.65rem;
-  font-weight: 500;
+  font-size: var(--kb-fs-xs);
+  font-weight: var(--kb-fw-semibold);
 }
 
 .md-typeset .highlight .filename + pre > code {
@@ -829,23 +1217,20 @@ body {
 }
 
 .md-clipboard:hover {
-  color: var(--kb-text-strong);
+  color: var(--kb-brand-link);
 }
 
 /* --- Admonition / Details ------------------------------------------------
  *
- * 사방이 균일한 1px 테두리 상자.
+ * 사방이 균일한 1px 테두리 상자. 왼쪽에만 굵은 컬러 바를 세운 형태는 쓰지 않는다.
+ * 그 좌측 바는 모든 항목을 "중요 노트"처럼 보이게 만드는 장식이다.
  *
- * kill-ai-slop 17번이 지목하는 것은 "테두리가 있는 상자" 자체가 아니라
- * **왼쪽에만 굵은 컬러 바를 세운 형태**(Rounded card, colored left border)다.
- * 그 좌측 바가 모든 항목을 "중요 노트"처럼 보이게 만드는 장식이라는 뜻이므로,
- * 테두리는 사방을 균일하게 두르고 좌측 강조 바만 없앤다.
+ * 타입 구분은 아이콘 + 제목 색 + 옅은 바탕으로 한다. 의미색은 1절의 --kb-sem-* 네 색이고,
+ * 바탕·테두리는 같은 색상각의 아주 옅은 색이라 본문 글자의 대비를 해치지 않는다.
+ * 본문 글자는 모든 타입에서 같은 색으로 둔다.
  *
- * 타입 구분은 아이콘 + 색으로 한다. 다만 04번이 지목하는 것은 "색이 있다"가
- * 아니라 프레임워크 기본색을 그대로 갖다 써서 서로 무관한 사탕색이 되는 것이다
- * ("unrelated candy colors, related to nothing — not your brand, not each other").
- * 그래서 --kb-sem-* 네 색은 OKLCH 명도·채도를 고정하고 색상각만 돌려 뽑았다.
- * 색은 아이콘과 라벨에만 닿고 배경·테두리는 무채색으로 남긴다(05번 회피).
+ * question 은 이 사이트에서 "인계자 보충 답변"의 질의응답에 쓰므로
+ * 경고색이 아니라 먹색을 쓴다(FAQ 페이지의 question 은 faq.js 가 문답 목록으로 바꾼다).
  *
  * 특이도 주의: Material은 타입별 색을 `.md-typeset .admonition.note` (0,3,0),
  * `.md-typeset .note>.admonition-title` (0,3,0) 로 선언한다. 같은 길이 이상으로
@@ -855,12 +1240,13 @@ body {
 .md-typeset .admonition,
 .md-typeset details {
   border: 1px solid var(--kb-border);
-  border-radius: var(--kb-radius-md);
+  border-radius: var(--kb-radius-lg);
   background-color: var(--kb-bg-subtle);
   box-shadow: none;
-  font-size: 0.76rem;
-  padding: 0.75rem 0.9rem;
-  margin: 1.4rem 0;
+  font-size: var(--kb-fs-md);
+  line-height: 1.75;
+  padding: 0.85rem 1.1rem;
+  margin: 1.5rem 0;
 }
 
 /* 파란 포커스 글로우 제거 — Material은 (0,4,0)으로 선언한다 */
@@ -874,23 +1260,22 @@ body {
   position: relative;
   background-color: transparent;
   color: var(--kb-sem-note);
-  font-weight: 600;
+  font-weight: var(--kb-fw-bold);
   font-size: 1em;
   line-height: inherit;
-  margin: 0 0 0.35rem;
-  padding: 0 0 0 1.5rem;
+  margin: 0 0 0.4rem;
+  padding: 0 0 0 1.6rem;
   border: none;
 }
 
-/* 아이콘 — 타입 구분은 색과 아이콘이 함께 한다.
- * top 은 줄 높이(1em × 1.75)에서 아이콘 높이를 뺀 절반이라, 첫 줄 한가운데에 앉는다.
+/* 아이콘 — top 은 줄 높이(1em × 1.75)에서 아이콘 높이를 뺀 절반이라, 첫 줄 한가운데에 앉는다.
  * 고정값을 쓰면 폰트 크기나 행간을 바꿀 때 다시 어긋난다. */
 .md-typeset .admonition > .admonition-title::before,
 .md-typeset details[class] > summary::before {
   display: block;
-  width: 1.05rem;
-  height: 1.05rem;
-  top: calc((1em * 1.75 - 1.05rem) / 2);
+  width: 1.1rem;
+  height: 1.1rem;
+  top: calc((1em * 1.75 - 1.1rem) / 2);
   left: 0;
   background-color: var(--kb-sem-note);
 }
@@ -905,9 +1290,9 @@ body {
 /* 접힌 상태의 위아래 여백을 맞춘다.
  * Material이 `.md-typeset details:not([open])` (0,2,1) 로 padding-bottom:0 을
  * 걸어두기 때문에 위쪽 패딩만 남고 아래는 summary 의 margin-bottom 만 남는다.
- * (측정값: 위 16px / 아래 8px) 같은 길이 이상으로 맞춰 되돌린다. */
+ * 같은 길이 이상으로 맞춰 되돌린다. */
 .md-typeset details[class]:not([open]) {
-  padding-bottom: 0.75rem;
+  padding-bottom: 0.85rem;
 }
 
 .md-typeset details[class]:not([open]) > summary {
@@ -916,7 +1301,7 @@ body {
 
 .md-typeset details[class] > summary::after {
   color: var(--kb-text-muted);
-  top: 0.05rem;
+  top: 0.1rem;
   right: 0;
 }
 
@@ -925,17 +1310,41 @@ body {
   margin-bottom: 0;
 }
 
-/* 테두리와 배경은 모든 타입에서 균일한 무채색을 유지한다.
- * 한 변만 색이 들어가면 좌측 바 패턴이 되고, 테두리·글자·배경을 모두 한 색으로
- * 칠하면 kill-ai-slop 05번(one-hue status box)이 된다.
- * → "one muted accent from your own palette on a neutral surface" */
+/* 기본(무채색) 상자 — 아래 타입별 규칙보다 앞에 두어 타입 규칙이 덮게 한다 */
 .md-typeset .admonition[class],
 .md-typeset details[class] {
   border-color: var(--kb-border);
   background-color: var(--kb-bg-subtle);
 }
 
-/* --- 타입별 색 · 아이콘 ---------------------------------------------------
+/* --- 타입별 바탕 · 테두리 ------------------------------------------------- */
+
+.md-typeset :is(.admonition, details):is(.note, .abstract, .info) {
+  background-color: var(--kb-note-bg);
+  border-color: var(--kb-note-line);
+}
+
+.md-typeset :is(.admonition, details):is(.tip, .success) {
+  background-color: var(--kb-tip-bg);
+  border-color: var(--kb-tip-line);
+}
+
+.md-typeset :is(.admonition, details).warning {
+  background-color: var(--kb-warn-bg);
+  border-color: var(--kb-warn-line);
+}
+
+.md-typeset :is(.admonition, details):is(.danger, .failure, .bug) {
+  background-color: var(--kb-danger-bg);
+  border-color: var(--kb-danger-line);
+}
+
+.md-typeset :is(.admonition, details).question {
+  background-color: var(--kb-ask-bg);
+  border-color: var(--kb-ask-line);
+}
+
+/* --- 타입별 제목 색 · 아이콘 색 -------------------------------------------
  * 아이콘 자체는 Material이 --md-admonition-icon--* 마스크로 넣어주므로
  * 여기서는 색만 지정한다. */
 
@@ -953,16 +1362,21 @@ body {
 }
 
 .md-typeset .admonition.warning > .admonition-title,
-.md-typeset details.warning > summary,
-.md-typeset .admonition.question > .admonition-title,
-.md-typeset details.question > summary {
+.md-typeset details.warning > summary {
   color: var(--kb-sem-warn);
 }
 .md-typeset .admonition.warning > .admonition-title::before,
-.md-typeset details.warning > summary::before,
+.md-typeset details.warning > summary::before {
+  background-color: var(--kb-sem-warn);
+}
+
+.md-typeset .admonition.question > .admonition-title,
+.md-typeset details.question > summary {
+  color: var(--kb-brand);
+}
 .md-typeset .admonition.question > .admonition-title::before,
 .md-typeset details.question > summary::before {
-  background-color: var(--kb-sem-warn);
+  background-color: var(--kb-brand);
 }
 
 .md-typeset .admonition.danger > .admonition-title,
@@ -996,43 +1410,617 @@ body {
   background-color: var(--kb-text-muted);
 }
 
-/* --- 표 ------------------------------------------------------------------ */
-.md-typeset table:not([class]) {
+/* 알림 상자 안의 표와 코드 — 상자 바탕 위에서 흰 칸으로 떠 보이게 한다 */
+.md-typeset :is(.admonition, details) table:not([class]),
+.md-typeset :is(.admonition, details) pre > code {
+  background-color: var(--kb-bg);
+}
+
+/* --- 기능개선 내역(배포 이력) ---------------------------------------------
+ *
+ * 제목에 `{ .kb-changelog }` 표지가 붙은 페이지만 대상으로 한다.
+ * javascripts/changelog.js 가 배포일마다 아래 구조로 묶는다.
+ *
+ *   section.kb-release
+ *     div.kb-release__date   h2(월·일) + p.kb-release__count(N건)
+ *     div.kb-release__items  details / .admonition (항목)
+ *
+ * 이 페이지의 일은 두 가지다. "언제 바뀌었나"를 날짜로 찾고, "어느 메뉴가
+ * 바뀌었나"를 메뉴명으로 훑는다. 그래서
+ * - 날짜는 왼쪽 열에 두고, 스크롤해도 그 배포일 구간 안에서는 화면에 고정한다.
+ * - 메뉴명은 고정 폭 열로 세워 제목이 한 세로선에서 시작하게 한다(표처럼 읽힘).
+ * - 상자·체크 아이콘·배경은 걷어 낸다. 모든 항목이 "개선"이라 아이콘은 정보가 없고,
+ *   상자는 항목을 나눌 뿐 의미가 없다. 가는 구분선만 남긴다.
+ * 범위 밖(일반 문서)의 Admonition 규칙은 위 그대로다.
+ * ------------------------------------------------------------------------- */
+
+.kb-changelog-page {
+  --kb-cl-date-col: 6rem; /* 날짜 열 */
+  --kb-cl-tag-col: 6.6rem; /* 메뉴명 열(대부분 6~8글자) */
+  --kb-cl-gap: 0.9rem;
+}
+
+
+/* 화면 낭독기용 — 연도는 페이지 제목에 있으므로 화면에서만 숨긴다 */
+.kb-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* 배포일 구간 */
+.md-typeset .kb-release {
+  display: grid;
+  grid-template-columns: var(--kb-cl-date-col) minmax(0, 1fr);
+  column-gap: 1.4rem;
+  padding: 1.4rem 0;
+  border-top: 1px solid var(--kb-border-strong);
+}
+
+.md-typeset .kb-release:last-child {
+  border-bottom: 1px solid var(--kb-border-strong);
+}
+
+/* 날짜 열 — 구간 안에서 화면에 고정(머리 영역 아래) */
+.md-typeset .kb-release__date {
+  position: sticky;
+  top: calc(var(--kb-chrome-h) + 1rem);
+  align-self: start;
+}
+
+/* 날짜는 명조로 — 인쇄된 업무일지의 날짜처럼 읽힌다 */
+.md-typeset .kb-release__date h2 {
+  margin: 0;
+  font-size: var(--kb-fs-xl);
+  font-weight: var(--kb-fw-semibold);
+  line-height: 1.3;
+  letter-spacing: -0.025em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* 날짜 옆의 ¶ 앵커는 날짜 열을 비좁게 하므로 마우스를 올렸을 때만 보인다 */
+.md-typeset .kb-release__date h2 .headerlink {
+  margin-left: 0.2em;
+  font-size: 0.7em;
+}
+
+.md-typeset .kb-release__count {
+  margin: 0.3rem 0 0;
+  color: var(--kb-text-muted);
+  font-size: var(--kb-fs-xs);
+  font-weight: var(--kb-fw-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 개선이 없었던 배포일 — 한 줄로 낮추고 흐리게 */
+.md-typeset .kb-release--empty {
+  padding: 0.8rem 0;
+}
+
+.md-typeset .kb-release--empty .kb-release__date h2 {
+  font-size: var(--kb-fs-md);
+  font-weight: var(--kb-fw-medium);
+  color: var(--kb-text-muted);
+}
+
+.md-typeset .kb-release--empty .kb-release__count {
+  display: none;
+}
+
+.md-typeset .kb-release--empty .kb-release__items {
+  align-self: center;
+  color: var(--kb-text-muted);
+  font-size: var(--kb-fs-sm);
+}
+
+.md-typeset .kb-release--empty .kb-release__items > p {
+  margin: 0;
+}
+
+/* 항목 — 상자를 걷어 내고 행 사이에 가는 선만 둔다.
+ * 특이도: 위 Admonition 규칙 `.md-typeset details[class]`(0,2,1),
+ * 타입별 바탕 규칙 `.md-typeset :is(.admonition, details):is(.tip, .success)`(0,3,0),
+ * `.md-typeset .admonition.success > .admonition-title`(0,3,0) 를 넘도록 범위 클래스를 앞에 둔다. */
+.kb-changelog-page .kb-release__items > :is(details, .admonition)[class] {
+  margin: 0;
+  padding: 0;
   border: none;
+  border-bottom: 1px solid var(--kb-border);
   border-radius: 0;
-  box-shadow: none;
-  font-size: 0.72rem;
+  background-color: transparent;
+  font-size: var(--kb-fs-md);
+}
+
+.kb-changelog-page .kb-release__items > :is(details, .admonition)[class]:last-child {
+  border-bottom: none;
+}
+
+/* 행 제목 — 메뉴명 열 | 제목 열 | 펼침 화살표 */
+.kb-changelog-page .kb-release__items > :is(details, .admonition)[class] > :is(summary, .admonition-title) {
+  display: grid;
+  grid-template-columns: var(--kb-cl-tag-col) minmax(0, 1fr);
+  column-gap: var(--kb-cl-gap);
+  align-items: baseline;
+  margin: 0;
+  padding: 0.7rem 1.6rem 0.7rem 0.3rem;
+  border: none;
+  background-color: transparent;
+  color: var(--kb-text-strong);
+  font-weight: var(--kb-fw-medium);
+  line-height: 1.55;
+}
+
+/* 체크 아이콘 제거 — 모든 항목이 같은 타입이라 정보가 없다 */
+.kb-changelog-page .kb-release__items > :is(details, .admonition)[class] > :is(summary, .admonition-title)::before {
+  display: none;
+}
+
+.kb-changelog-page .kb-release__items > details[class] > summary {
+  cursor: pointer;
+  border-radius: var(--kb-radius-sm);
+  transition: background-color 0.12s var(--kb-ease);
+}
+
+.kb-changelog-page .kb-release__items > details[class] > summary:hover {
+  background-color: var(--kb-hover);
+}
+
+.kb-changelog-page .kb-release__items > details[class] > summary:focus-visible {
+  outline: 2px solid var(--kb-accent);
+  outline-offset: 2px;
+}
+
+/* 펼침 화살표 — 제목 첫 줄 높이에 맞춘다 */
+.kb-changelog-page .kb-release__items > details[class] > summary::after {
+  top: 0.8rem;
+  right: 0.3rem;
+  color: var(--kb-border-strong);
+}
+
+.kb-changelog-page .kb-release__items > details[class] > summary:hover::after,
+.kb-changelog-page .kb-release__items > details[class][open] > summary::after {
+  color: var(--kb-brand);
+}
+
+/* 메뉴명 열 — 테두리 없는 회갈색 글자. 긴 메뉴명은 열 안에서 줄바꿈한다 */
+.kb-changelog-page .kb-tag {
+  color: var(--kb-text-muted);
+  font-size: var(--kb-fs-xs);
+  font-weight: var(--kb-fw-semibold);
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+/* 펼친 내용 — 제목 열의 세로선에 맞춘다 */
+.kb-changelog-page .kb-release__items > :is(details, .admonition)[class] > :not(summary, .admonition-title) {
+  margin-left: calc(var(--kb-cl-tag-col) + var(--kb-cl-gap) + 0.3rem);
+  margin-right: 0;
+}
+
+.kb-changelog-page .kb-release__items > :is(details[open], .admonition)[class] {
+  padding-bottom: 0.9rem;
+}
+
+.kb-changelog-page .kb-release__items > :is(details[open], .admonition)[class] > :is(summary, .admonition-title) {
+  font-weight: var(--kb-fw-semibold);
+}
+
+.kb-changelog-page .kb-release__items > :is(details, .admonition)[class] ul,
+.kb-changelog-page .kb-release__items > :is(details, .admonition)[class] ol {
+  margin-top: 0;
+  color: var(--kb-text);
+}
+
+/* 펼친 내용의 마지막 요소 — 목록 아래 여백이 상자·구간 여백과 겹치지 않게 */
+.kb-changelog-page .kb-release__items > :is(details, .admonition)[class] > :last-child {
+  margin-bottom: 0;
+}
+
+.kb-changelog-page .kb-release__items > :is(details, .admonition)[class] table {
+  font-size: var(--kb-fs-xs);
+}
+
+/* 좁은 화면 — 날짜를 구간 머리로 올리고, 메뉴명은 제목 위에 둔다 */
+@media screen and (max-width: 59.984em) {
+  .md-typeset .kb-release {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 0.4rem;
+  }
+
+  .md-typeset .kb-release__date {
+    position: static;
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+  }
+
+  .md-typeset .kb-release__count {
+    margin: 0;
+  }
+
+  .kb-changelog-page .kb-release__items > :is(details, .admonition)[class] > :is(summary, .admonition-title) {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 0.1rem;
+  }
+
+  .kb-changelog-page .kb-tag--empty {
+    display: none;
+  }
+
+  .kb-changelog-page .kb-release__items > :is(details, .admonition)[class] > :not(summary, .admonition-title) {
+    margin-left: 0;
+  }
+}
+
+/* --- 자주묻는 질문 --------------------------------------------------------
+ *
+ * 제목에 `{ .kb-faq }` 표지가 붙은 페이지만 대상으로 한다.
+ * javascripts/faq.js 가 아래 구조로 바꾼다.
+ *
+ *   div.kb-faq-toolbar          페이지 안 검색 + 모두 펼치기
+ *   section.kb-faq-group
+ *     div.kb-faq-group__head    h2(메뉴) + p.kb-faq-group__path + p.kb-faq-group__count
+ *     div.kb-faq-group__items   details.kb-qa (summary > .kb-qa__q, div.kb-qa__a)
+ *
+ * 이 페이지는 읽는 문서가 아니라 찾는 도구다. 그래서
+ * - 답변은 접고 질문만 훑게 한다(209개 질문이 한 화면에서 목록으로 읽힘).
+ * - 메뉴는 기능개선 내역의 날짜 열과 같은 왼쪽 고정 열에 둔다(업무관리 탭의 공통 문법).
+ * - 힘을 주는 곳은 기능 하나, 페이지 안 검색뿐이다. 나머지는 가는 선과 무채색으로 둔다.
+ * ------------------------------------------------------------------------- */
+
+.kb-faq-page {
+  --kb-faq-head-col: 9rem; /* 메뉴 열 */
+}
+
+/* 검색 도구줄 — 돋보기는 입력칸 안쪽 왼쪽에 둔다(행의 ::before) */
+.md-typeset .kb-faq-toolbar {
+  margin: 1.6rem 0 0.4rem;
+  padding: 0.9rem;
+  border: 1px solid var(--kb-border);
+  border-radius: var(--kb-radius-lg);
+  background-color: var(--kb-brand-wash);
+}
+
+.md-typeset .kb-faq-toolbar__row {
+  position: relative;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.md-typeset .kb-faq-toolbar__row::before {
+  content: "";
+  position: absolute;
+  left: 0.8rem;
+  top: 50%;
+  width: 1.05rem;
+  height: 1.05rem;
+  transform: translateY(-50%);
+  background-color: var(--kb-brand);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5'/%3E%3C/svg%3E") center / contain no-repeat;
+  pointer-events: none;
+}
+
+.md-typeset .kb-faq-toolbar__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 2.3rem;
+  padding: 0 0.8rem 0 2.3rem;
+  border: 1px solid var(--kb-border-strong);
+  border-radius: var(--kb-radius-md);
+  background-color: var(--kb-bg);
+  color: var(--kb-text-strong);
+  font: inherit;
+  font-size: var(--kb-fs-md);
+  transition: border-color 0.15s var(--kb-ease), box-shadow 0.15s var(--kb-ease);
+}
+
+.md-typeset .kb-faq-toolbar__input::placeholder {
+  color: var(--kb-text-muted);
+}
+
+.md-typeset .kb-faq-toolbar__input:focus {
+  border-color: var(--kb-brand-link);
+  box-shadow: 0 0 0 3px var(--md-accent-fg-color--transparent);
+  outline: none;
+}
+
+.md-typeset .kb-faq-toolbar__toggle:focus-visible {
+  outline: 2px solid var(--kb-accent);
+  outline-offset: 1px;
+}
+
+.md-typeset .kb-faq-toolbar__toggle {
+  flex: none;
+  height: 2.3rem;
+  padding: 0 0.95rem;
+  border: 1px solid var(--kb-border-strong);
+  border-radius: var(--kb-radius-md);
+  background-color: var(--kb-bg);
+  color: var(--kb-text);
+  font: inherit;
+  font-size: var(--kb-fs-sm);
+  font-weight: var(--kb-fw-semibold);
+  cursor: pointer;
+  transition: background-color 0.15s var(--kb-ease), border-color 0.15s var(--kb-ease);
+}
+
+.md-typeset .kb-faq-toolbar__toggle:hover {
+  background-color: var(--kb-hover);
+  border-color: var(--kb-brand-link);
+  color: var(--kb-text-strong);
+}
+
+.md-typeset .kb-faq-toolbar__status {
+  margin: 0.5rem 0 0;
+  color: var(--kb-text-muted);
+  font-size: var(--kb-fs-xs);
+  font-variant-numeric: tabular-nums;
+}
+
+.md-typeset .kb-faq-empty {
+  margin: 1.2rem 0;
+  padding: 1rem 0;
+  border-top: 1px solid var(--kb-border-strong);
+  color: var(--kb-text-muted);
+  font-size: var(--kb-fs-sm);
+}
+
+/* 검색어 강조 — 사이트 형광펜 색을 쓴다 */
+::highlight(kb-faq-hit) {
+  background-color: var(--md-typeset-mark-color);
+  color: inherit;
+}
+
+/* 메뉴 구간 */
+.md-typeset .kb-faq-group {
+  display: grid;
+  grid-template-columns: var(--kb-faq-head-col) minmax(0, 1fr);
+  column-gap: 1.4rem;
+  padding: 1.2rem 0;
+  border-top: 1px solid var(--kb-border-strong);
+}
+
+.md-typeset .kb-faq-group[hidden] {
+  display: none;
+}
+
+.md-typeset .kb-faq-group:last-of-type {
+  border-bottom: 1px solid var(--kb-border-strong);
+}
+
+/* 메뉴 열 — 구간 안에서 화면에 고정(머리 영역 아래) */
+.md-typeset .kb-faq-group__head {
+  position: sticky;
+  top: calc(var(--kb-chrome-h) + 1rem);
+  align-self: start;
+  padding-top: 0.55rem;
+}
+
+.md-typeset .kb-faq-group__head h2 {
+  margin: 0;
+  font-size: var(--kb-fs-lg);
+  font-weight: var(--kb-fw-semibold);
+  line-height: 1.4;
+  letter-spacing: -0.02em;
+}
+
+.md-typeset .kb-faq-group__head h2 .headerlink {
+  margin-left: 0.2em;
+  font-size: 0.75em;
+}
+
+.md-typeset .kb-faq-group__path {
+  margin: 0.3rem 0 0;
+  color: var(--kb-text-muted);
+  font-size: var(--kb-fs-xs);
+  line-height: 1.55;
+}
+
+.md-typeset .kb-faq-group__count {
+  margin: 0.3rem 0 0;
+  color: var(--kb-text-muted);
+  font-size: var(--kb-fs-xs);
+  font-weight: var(--kb-fw-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 문답 한 쌍 — 사이트 기본 details 상자를 걷어 내고 행 사이에 가는 선만 둔다.
+ * 특이도: Admonition 절의 `.md-typeset details[class]`(0,2,1) 와
+ * 타입별 바탕 규칙(0,3,0)을 넘도록 범위 클래스를 앞에 둔다. */
+.kb-faq-page .kb-faq-group__items > details.kb-qa[class] {
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-top: 1px solid var(--kb-border);
+  border-radius: 0;
+  background-color: transparent;
+  font-size: var(--kb-fs-md);
+}
+
+/* 행 구분선은 위쪽에 긋고, 보이는 첫 행에서만 지운다.
+ * 아래쪽에 그으면 검색으로 뒤 행이 숨겨졌을 때 보이는 마지막 행 아래에 선이 남는다. */
+.kb-faq-page .kb-faq-group__items > details.kb-qa[class]:not([hidden]):not(details.kb-qa:not([hidden]) ~ *) {
+  border-top: none;
+}
+
+.kb-faq-page .kb-faq-group__items > details.kb-qa[hidden] {
+  display: none;
+}
+
+/* 질문 행 */
+.kb-faq-page details.kb-qa[class] > summary {
+  display: block;
+  margin: 0;
+  padding: 0.6rem 1.8rem 0.6rem 0.3rem;
+  border: none;
+  border-radius: var(--kb-radius-sm);
+  background-color: transparent;
+  color: var(--kb-text-strong);
+  font-weight: var(--kb-fw-medium);
+  line-height: 1.6;
+  cursor: pointer;
+  transition: background-color 0.12s var(--kb-ease);
+}
+
+.kb-faq-page details.kb-qa[class] > summary::before {
+  display: none;
+}
+
+.kb-faq-page details.kb-qa[class] > summary:hover {
+  background-color: var(--kb-hover);
+}
+
+.kb-faq-page details.kb-qa[class] > summary:focus-visible {
+  outline: 2px solid var(--kb-accent);
+  outline-offset: 2px;
+}
+
+.kb-faq-page details.kb-qa[class] > summary::after {
+  top: 0.75rem;
+  right: 0.3rem;
+  color: var(--kb-border-strong);
+}
+
+.kb-faq-page details.kb-qa[class] > summary:hover::after,
+.kb-faq-page details.kb-qa[class][open] > summary::after {
+  color: var(--kb-brand);
+}
+
+.kb-faq-page details.kb-qa[class][open] > summary {
+  font-weight: var(--kb-fw-semibold);
+  color: var(--kb-brand);
+}
+
+/* 답변 — 질문보다 한 단계 낮은 위계. 한 줄은 60자 안팎으로 제한한다 */
+.kb-faq-page details.kb-qa[class] > .kb-qa__a {
+  max-width: 44rem;
+  padding: 0 1.8rem 0.9rem 0.3rem;
+  color: var(--kb-text);
+}
+
+.kb-faq-page details.kb-qa[class] > .kb-qa__a > :last-child {
+  margin-bottom: 0;
+}
+
+.kb-faq-page details.kb-qa[class] > .kb-qa__a p {
+  margin-bottom: 0.5rem;
+}
+
+/* 좁은 화면 — 메뉴 열을 구간 머리로 올린다 */
+@media screen and (max-width: 59.984em) {
+  .md-typeset .kb-faq-group {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 0.3rem;
+  }
+
+  .md-typeset .kb-faq-group__head {
+    position: static;
+    padding-top: 0;
+  }
+
+  .md-typeset .kb-faq-group__count {
+    display: none;
+  }
+
+  .kb-faq-page details.kb-qa[class] > .kb-qa__a {
+    padding-right: 0;
+  }
+}
+
+/* --- 표 ------------------------------------------------------------------
+ *
+ * 세로선과 둥근 테두리를 쓰지 않고 가로선으로만 나눈다. 표의 위와 머리 행 아래, 표의 끝은
+ * 베이지 선, 행 사이는 더 옅은 선이다. 짙은 괘선은 크림색 화면에서 너무 딱딱해 쓰지 않는다.
+ * 2열 요약 표처럼 첫 칸이 굵은 라벨뿐이면 그 칸을 한지색 "라벨 칸"으로 둔다.
+ *
+ * Material은 표를 inline-block 래퍼(.md-typeset__table)로 감싸
+ * 표마다 내용 폭에 맞춰 줄어든다. 래퍼를 block 으로 바꿔 모든 표가 본문 폭을 채우게 한다.
+ * 넓은 표는 페이지가 아니라 Material의 표 스크롤 래퍼 안에서만 움직인다.
+ * ------------------------------------------------------------------------- */
+.md-typeset__scrollwrap {
+  margin: 1.2em -0.8rem;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+}
+
+.md-typeset__table {
+  display: block;
+}
+
+.md-typeset table:not([class]) {
   display: table;
   width: 100%;
+  border: none;
+  border-top: 1px solid var(--kb-border-strong);
+  border-bottom: 1px solid var(--kb-border-strong);
+  /* 칸마다 따로 그린 가로선이 칸 경계에서 끊겨 보이지 않도록 테두리를 합친다 */
+  border-collapse: collapse;
+  border-spacing: 0;
+  border-radius: 0;
+  background-color: transparent;
+  box-shadow: none;
+  font-size: var(--kb-fs-sm); /* 15px */
+  line-height: 1.65;
 }
 
 .md-typeset table:not([class]) th {
   background-color: transparent;
-  color: var(--kb-text-strong);
-  font-weight: 600;
+  color: var(--kb-text-muted);
+  font-weight: var(--kb-fw-semibold);
+  font-size: var(--kb-fs-xs);
+  letter-spacing: 0.01em;
   border-bottom: 1px solid var(--kb-border-strong);
-  padding: 0.6rem 0.8rem 0.6rem 0;
+  padding: 0.7rem 0.9rem 0.6rem;
   white-space: nowrap;
+  vertical-align: bottom;
 }
 
 .md-typeset table:not([class]) td {
+  border-top: none;
   border-bottom: 1px solid var(--kb-border);
-  padding: 0.6rem 0.8rem 0.6rem 0;
+  padding: 0.75rem 0.9rem;
   vertical-align: top;
+  font-variant-numeric: tabular-nums;
 }
 
-.md-typeset table:not([class]) tr:hover {
-  background-color: transparent;
+/* 첫 열과 끝 열은 본문의 세로선에 붙여 표가 글줄과 같은 폭으로 읽히게 한다 */
+.md-typeset table:not([class]) :is(th, td):first-child {
+  padding-left: 0.2rem;
+}
+
+.md-typeset table:not([class]) :is(th, td):last-child {
+  padding-right: 0.2rem;
+}
+
+.md-typeset table:not([class]) tbody tr {
+  transition: background-color 0.12s var(--kb-ease);
+}
+
+.md-typeset table:not([class]) tbody tr:hover {
+  background-color: var(--kb-row-hover);
+  box-shadow: none;
 }
 
 .md-typeset table:not([class]) tbody tr:last-child td {
   border-bottom: none;
 }
 
-/* 넓은 표는 페이지가 아니라 Material의 표 스크롤 래퍼 안에서만 움직인다. */
-.md-typeset__scrollwrap {
-  overflow-x: auto;
-  overscroll-behavior-inline: contain;
+/* 라벨 칸 — 2열 표에서 첫 칸이 굵은 글씨 하나뿐일 때(요약 표의 "구분" 열 등) */
+.md-typeset table:not([class]):has(th:nth-child(2):last-child) td:first-child:has(> strong:only-child) {
+  width: 22%;
+  min-width: 7rem;
+  padding-left: 0.9rem;
+  background-color: var(--kb-brand-wash);
+}
+
+.md-typeset table:not([class]) td:first-child > strong:only-child {
+  color: var(--kb-text-strong);
+  font-weight: var(--kb-fw-bold);
 }
 
 /* --- 콘텐츠 탭 ------------------------------------------------------------ */
@@ -1042,19 +2030,19 @@ body {
 }
 
 .md-typeset .tabbed-labels > label {
-  font-size: 0.7rem;
-  font-weight: 500;
+  font-size: var(--kb-fs-sm);
+  font-weight: var(--kb-fw-semibold);
   color: var(--kb-text-muted);
-  padding: 0.5rem 0.8rem;
+  padding: 0.55rem 0.9rem;
 }
 
 .md-typeset .tabbed-labels > label:hover {
-  color: var(--kb-text);
+  color: var(--kb-text-strong);
 }
 
 .md-typeset .tabbed-set > input:checked + label {
-  color: var(--kb-text-strong);
-  font-weight: 600;
+  color: var(--kb-brand);
+  font-weight: var(--kb-fw-bold);
 }
 
 .md-typeset .tabbed-labels--linked > label > a {
@@ -1064,71 +2052,30 @@ body {
 /* --- 버튼 ---------------------------------------------------------------- */
 .md-typeset .md-button {
   border: 1px solid var(--kb-border-strong);
-  border-radius: var(--kb-radius-sm);
+  border-radius: var(--kb-radius-md);
   color: var(--kb-text-strong);
-  font-size: 0.72rem;
-  font-weight: 500;
-  padding: 0.4rem 0.95rem;
+  font-size: var(--kb-fs-sm);
+  font-weight: var(--kb-fw-semibold);
+  padding: 0.45rem 1rem;
   transition: background-color 0.15s var(--kb-ease), border-color 0.15s var(--kb-ease);
 }
 
 .md-typeset .md-button:hover {
   background-color: var(--kb-hover);
-  border-color: var(--kb-text-muted);
+  border-color: var(--kb-brand-link);
   color: var(--kb-text-strong);
 }
 
 .md-typeset .md-button--primary {
-  background-color: var(--kb-accent);
-  border-color: var(--kb-accent);
+  background-color: var(--kb-brand);
+  border-color: var(--kb-brand);
   color: var(--kb-accent-contrast);
 }
 
 .md-typeset .md-button--primary:hover {
-  background-color: var(--kb-text);
-  border-color: var(--kb-text);
+  background-color: var(--kb-brand-strong);
+  border-color: var(--kb-brand-strong);
   color: var(--kb-accent-contrast);
-}
-
-/* --- 홈 문서 디렉터리 ----------------------------------------------------- */
-.md-typeset .kb-directory {
-  margin: 1.2rem 0 2.4rem;
-}
-
-.md-typeset .kb-directory > ul {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.md-typeset .kb-directory > ul > li {
-  display: grid;
-  grid-template-columns: minmax(7rem, 0.32fr) minmax(0, 1fr);
-  gap: 0.75rem 1.5rem;
-  border-top: 1px solid var(--kb-border);
-  margin: 0;
-  padding: 0.85rem 0;
-}
-
-.md-typeset .kb-directory > ul > li:last-child {
-  border-bottom: 1px solid var(--kb-border);
-}
-
-.md-typeset .kb-directory > ul > li > p {
-  margin: 0;
-}
-
-.md-typeset .kb-directory > ul > li > p:first-child {
-  color: var(--kb-text-strong);
-  font-weight: 600;
-}
-
-.md-typeset .kb-directory > ul > li > p:last-child {
-  color: var(--kb-text-muted);
-}
-
-.md-typeset .kb-directory a::after {
-  content: " →";
 }
 
 /* --- 체크리스트 -----------------------------------------------------------
@@ -1139,23 +2086,32 @@ body {
 }
 
 .md-typeset [type="checkbox"]:checked + .task-list-indicator::before {
-  background-color: var(--kb-accent);
+  background-color: var(--kb-brand);
 }
 
 /* --- 키보드 키 ------------------------------------------------------------ */
 .md-typeset kbd {
-  background-color: var(--kb-bg-subtle);
+  background-color: var(--kb-bg);
   border-radius: var(--kb-radius-sm);
-  box-shadow: 0 0 0 1px var(--kb-border-strong) inset, 0 1px 0 var(--kb-border);
+  box-shadow: 0 0 0 1px var(--kb-border-strong) inset, 0 1px 0 var(--kb-border-strong);
   color: var(--kb-text-strong);
   font-size: 0.75em;
 }
 
-/* --- Mermaid 다이어그램 (javascripts/pretty-mermaid.js) ------------------- */
-/* 렌더링 결과는 Shadow DOM 에 들어가므로 여기서는 바깥 여백만 잡는다.
+/* --- Mermaid 다이어그램 (javascripts/pretty-mermaid.js) -------------------
+ * 렌더링 결과는 Shadow DOM 에 들어가므로 여기서는 바깥 틀만 잡는다.
+ * 그려진 도표는 옅은 베이지 판 위에 흰 상자로 놓여 본문과 구별된다.
+ * 판의 색은 1절의 --kb-diagram-bg 로, 스크립트가 같은 색을 도표 바탕으로 넘긴다.
  * 렌더링 전(스크립트 로딩 중·실패 시)에는 원문을 코드처럼 보여 준다. */
 .md-typeset .pretty-mermaid {
   margin: 1.5em 0;
+}
+
+.md-typeset .pretty-mermaid--ready {
+  padding: 1.2rem 1rem;
+  border: 1px solid var(--kb-border);
+  border-radius: var(--kb-radius-lg);
+  background-color: var(--kb-diagram-bg);
 }
 
 .md-typeset .pretty-mermaid:not(.pretty-mermaid--ready) {
@@ -1169,50 +2125,645 @@ body {
   overflow-x: auto;
 }
 
+/* --- Vega-Lite 차트 (javascripts/vegalite.js) ----------------------------- */
+.md-typeset .vegalite--ready {
+  display: block;
+  margin: 1.5em 0;
+  padding: 1.1rem 1.2rem 0.8rem;
+  border: 1px solid var(--kb-border);
+  border-radius: var(--kb-radius-lg);
+  background-color: var(--kb-bg);
+}
+
+/* --- 결재란 (진행 단계 표시) -----------------------------------------------
+ *
+ * 인수인계 한 건의 처리 과정(AGENTS.md 처리 과정의 1~4단계)을 공문서의 결재란으로 보여 준다.
+ * 끝난 단계에는 인주색 도장이 찍히고, 남은 단계는 빈칸으로 둔다.
+ *   · 인수인계 허브의 상태 칸: javascripts/approval.js(칸의 상태 글자를 결재란으로 바꾼다)
+ *
+ *   div.kb-sign
+ *     div.kb-sign__cell × 4    span.kb-sign__role(단계 이름) + span.kb-sign__mark(> span.kb-seal)
+ * ------------------------------------------------------------------------- */
+.kb-sign {
+  --kb-sign-line: var(--kb-border-strong);
+  --kb-sign-head: var(--kb-brand-wash);
+  --kb-sign-label: var(--kb-text-muted);
+  --kb-sign-bg: var(--kb-bg);
+  display: inline-grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 2.75rem;
+  flex: none;
+  border: 1px solid var(--kb-sign-line);
+  background-color: var(--kb-sign-bg);
+  font-size: 0.56rem;
+  line-height: 1.2;
+  letter-spacing: 0;
+}
+
+.kb-sign__cell {
+  display: grid;
+  grid-template-rows: auto 2.6rem;
+  border-left: 1px solid var(--kb-sign-line);
+}
+
+.kb-sign__cell:first-child {
+  border-left: none;
+}
+
+.kb-sign__role {
+  padding: 0.22rem 0;
+  border-bottom: 1px solid var(--kb-sign-line);
+  background-color: var(--kb-sign-head);
+  color: var(--kb-sign-label);
+  font-weight: var(--kb-fw-semibold);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.kb-sign__mark {
+  display: grid;
+  place-items: center;
+}
+
+/* 도장 — 바깥 테두리와 안쪽 가는 테두리를 겹쳐 그린 두 줄 원 */
+.kb-seal {
+  display: grid;
+  place-items: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  box-sizing: border-box;
+  border: 2px solid var(--kb-seal);
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1.5px var(--kb-sign-bg), inset 0 0 0 2.5px var(--kb-seal);
+  color: var(--kb-seal);
+  font-family: var(--kb-font-serif);
+  font-size: 0.54rem;
+  font-weight: var(--kb-fw-bold);
+  letter-spacing: 0.02em;
+  opacity: 0.92;
+}
+
+/* 일부만 끝난 단계(일부 미회신) — 점선 도장 */
+.kb-seal--partial {
+  border-style: dashed;
+  box-shadow: none;
+}
+
+/* 표 칸 안의 작은 결재란(인수인계 허브의 상태 칸) */
+.kb-sign--mini {
+  display: grid;
+  width: max-content;
+  margin-top: 0.15rem;
+  grid-auto-columns: 2.1rem;
+  font-size: 0.5rem;
+}
+
+.kb-sign--mini .kb-sign__cell {
+  grid-template-rows: auto 1.75rem;
+}
+
+.kb-sign--mini .kb-sign__role {
+  padding: 0.12rem 0;
+}
+
+.kb-sign--mini .kb-seal {
+  width: 1.4rem;
+  height: 1.4rem;
+  border-width: 1.5px;
+  box-shadow: inset 0 0 0 1px var(--kb-sign-bg), inset 0 0 0 1.75px var(--kb-seal);
+  font-size: 0.4rem;
+}
+
 /* ---------------------------------------------------------------------------
- * 10. 푸터 / 기타
+ * 10. 홈 화면 (overrides/main.html 이 본문을 div.kb-home 으로 감싼다)
+ *
+ * 홈은 사이드바 없이(index.md 의 hide 설정) 넓은 한 단으로 둔다.
+ * 다른 문서와 구별되도록 홈만 바탕을 한 단계 짙은 베이지(책상)로 깔고,
+ * 표지(기호·제목·검색·바로가기) 아래 각 절의 내용(요약, 최근 업데이트, 탐색 안내)을 크림색 종이 한 장씩으로 올려놓는다.
+ * 그림자나 장식 없이 바탕과 종이의 명도 차이와 가는 테두리만으로 구별한다.
+ * ------------------------------------------------------------------------- */
+
+/* --- 홈 본문 --------------------------------------------------------------- */
+
+/* 홈 바탕. 디자인 토큰을 홈에서만 바꿔 헤더·탭바·바닥글까지 같은 바탕이 되게 한다.
+ * body 의 data-md-color-scheme 선언(0,1,0)보다 길게 써서 이 값이 이긴다. */
+body[data-md-color-scheme="default"]:has(.kb-home) {
+  --kb-bg: #f0eee6;
+  --kb-bg-subtle: #e9e6dc;
+  --kb-hover: #e8e5db;
+  --kb-border: #e0dccf;
+  --kb-sheet: #faf9f5; /* 종이 */
+  --kb-ill-wash: #e9d6c2; /* 그림 뒤의 둥근 면(옅은 점토색) */
+  --kb-ill-tone: #dccfb6; /* 서류철 */
+  --kb-ill-accent-light: #eba78d; /* 인장 윗면 */
+}
+
+body[data-md-color-scheme="slate"]:has(.kb-home) {
+  --kb-bg: #1e1d1b;
+  --kb-bg-subtle: #252422;
+  --kb-hover: #2a2926;
+  --kb-border: #33322e;
+  --kb-sheet: #2a2927;
+  --kb-ill-wash: #33291f;
+  --kb-ill-tone: #4a4238;
+  --kb-ill-accent-light: #e8a088;
+}
+
+/* 바탕 — 종이 결과 넓은 붓질.
+ * ::before 는 화면 전체에 아주 고운 종이 결(잡음 무늬)을, ::after 는 가장자리로 흐르는
+ * 손그림 선 몇 개를 깐다. 둘 다 마스크로만 모양을 쓰고 색은 글자색에 낮은 불투명도를 주므로
+ * 라이트·다크 모드를 함께 따른다. 종이(표·목록)는 불투명해 바탕 위에 올라앉는다. */
+body:has(.kb-home) .md-main {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+body:has(.kb-home) .md-main::before,
+body:has(.kb-home) .md-main::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-color: var(--kb-text-strong);
+  pointer-events: none;
+}
+
+body:has(.kb-home) .md-main::before {
+  opacity: 0.05;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E %3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E %3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1.6 -0.55'/%3E%3C/filter%3E %3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E") 0 0 / 220px 220px repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E %3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E %3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1.6 -0.55'/%3E%3C/filter%3E %3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E") 0 0 / 220px 220px repeat;
+}
+
+body:has(.kb-home) .md-main::after {
+  opacity: 0.07;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1440' height='1700' viewBox='0 0 1440 1700' fill='none' stroke='black' stroke-linecap='round'%3E %3Cfilter id='h'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.02' numOctaves='2' seed='4'/%3E%3CfeDisplacementMap in='SourceGraphic' scale='6'/%3E%3C/filter%3E %3Cg filter='url(%23h)'%3E %3Cpath stroke-width='3' d='M-40 640C80 560 180 600 200 700s-60 170-150 150-90-130 0-170c120-50 260 40 300 160'/%3E %3Cpath stroke-width='3' d='M1480 980c-120-40-260 10-300 120-30 90 40 170 130 150 70-16 90-100 40-140-60-50-170 0-210 90-40 90-10 220 90 300'/%3E %3Cpath stroke-width='2.5' d='M60 1500c160-70 320-60 460 10s300 80 420 10 260-90 380-30'/%3E %3Ccircle cx='1340' cy='560' r='70' stroke-width='2.5'/%3E %3Cpath stroke-width='2.5' d='M1310 470l-8-26M1366 470l10-24M1400 520l24-12'/%3E %3C/g%3E%3C/svg%3E") center top / max(1440px, 100%) auto no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1440' height='1700' viewBox='0 0 1440 1700' fill='none' stroke='black' stroke-linecap='round'%3E %3Cfilter id='h'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.02' numOctaves='2' seed='4'/%3E%3CfeDisplacementMap in='SourceGraphic' scale='6'/%3E%3C/filter%3E %3Cg filter='url(%23h)'%3E %3Cpath stroke-width='3' d='M-40 640C80 560 180 600 200 700s-60 170-150 150-90-130 0-170c120-50 260 40 300 160'/%3E %3Cpath stroke-width='3' d='M1480 980c-120-40-260 10-300 120-30 90 40 170 130 150 70-16 90-100 40-140-60-50-170 0-210 90-40 90-10 220 90 300'/%3E %3Cpath stroke-width='2.5' d='M60 1500c160-70 320-60 460 10s300 80 420 10 260-90 380-30'/%3E %3Ccircle cx='1340' cy='560' r='70' stroke-width='2.5'/%3E %3Cpath stroke-width='2.5' d='M1310 470l-8-26M1366 470l10-24M1400 520l24-12'/%3E %3C/g%3E%3C/svg%3E") center top / max(1440px, 100%) auto no-repeat;
+}
+
+/* 표지 그림 뒤의 둥근 면이 무늬를 가리도록 그림을 무늬 위에 둔다 */
+.md-typeset .kb-cover {
+  position: relative;
+}
+
+/* 장 사이 구분선은 종이가 대신하므로 홈에서는 숨긴다 */
+.kb-home > hr {
+  display: none;
+}
+
+/* 종이 다음 절 제목은 충분히 띄운다. 숨긴 구분선 뒤의 제목에 붙는 좁은 간격(8절)도 덮는다 */
+.kb-home > h2,
+.kb-home > hr + h2 {
+  margin-top: 3.4rem;
+}
+
+/* 종이 — 각 절의 내용 덩어리(표 두 개와 탐색 안내 목록) */
+.kb-home > .md-typeset__scrollwrap,
+.kb-home h2[id$="탐색-안내"] ~ ul {
+  margin: 1.2rem 0 0;
+  border: 1px solid var(--kb-border);
+  border-radius: 14px;
+  background-color: var(--kb-sheet);
+}
+
+.kb-home > .md-typeset__scrollwrap .md-typeset__table {
+  padding: 0.3rem 1.8rem;
+}
+
+.kb-home > .md-typeset__scrollwrap table:not([class]) {
+  border-top: none;
+  border-bottom: none;
+}
+
+.kb-home h2[id$="탐색-안내"] ~ ul {
+  padding: 1.3rem 1.8rem 1.3rem 3rem;
+}
+
+.kb-home h2[id$="탐색-안내"] ~ ul ul {
+  margin: 0.3rem 0 0.6rem;
+  padding: 0;
+  border: none;
+  background: none;
+}
+
+/* 사이드바가 없으므로 본문을 가운데 한 단으로 둔다 */
+.md-content__inner:has(> .kb-home) {
+  box-sizing: border-box;
+  max-width: 60rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding-top: 1.6rem;
+}
+
+/* --- 표지(partials/home-cover.html) ---------------------------------------
+ * 왼쪽에 큰 명조 제목·소개·바로가기, 오른쪽에 인수인계를 나타낸 그림.
+ * 화면에서 힘을 준 곳은 이 한 덩어리이고, 아래 절들은 조용한 종이로 둔다.
+ * 표지는 본문(.md-typeset) 안에 있으므로 본문의 h1·리드 문단 규칙을 이기도록 .md-typeset 을 앞에 붙인다. */
+.md-typeset .kb-cover {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  align-items: center;
+  gap: 2.4rem;
+  margin: 0.8rem 0 3.6rem;
+}
+
+.md-typeset .kb-cover__title {
+  margin: 0;
+  font-family: var(--kb-font-serif);
+  font-size: 3rem; /* 60px — 표지 제목만 쓰는 크기 */
+  font-weight: var(--kb-fw-semibold);
+  line-height: 1.1;
+  letter-spacing: -0.045em;
+  color: var(--kb-text-strong);
+}
+
+.md-typeset .kb-cover__lead {
+  max-width: 26rem;
+  margin: 1.2rem 0 1.8rem;
+  color: var(--kb-text-muted);
+  font-size: var(--kb-fs-lg);
+  line-height: 1.75;
+  word-break: keep-all;
+}
+
+/* 바로가기 — 테두리만 있는 둥근 단추 */
+.md-typeset .kb-cover__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  max-width: 32rem;
+}
+
+.md-typeset .kb-cover__links a {
+  display: inline-flex;
+  align-items: center;
+  height: 2.1rem;
+  padding: 0 1rem;
+  border: 1px solid var(--kb-border-strong);
+  border-radius: 999px;
+  color: var(--kb-text);
+  font-size: var(--kb-fs-sm);
+  font-weight: var(--kb-fw-medium);
+  text-decoration: none;
+  transition: background-color 0.15s var(--kb-ease), border-color 0.15s var(--kb-ease);
+}
+
+.md-typeset .kb-cover__links a:hover {
+  border-color: var(--kb-text-faint);
+  background-color: var(--kb-sheet);
+  color: var(--kb-text-strong);
+}
+
+/* 그림 — 선은 먹색, 면은 종이·베이지·테라코타. 토큰을 쓰므로 다크 모드를 따른다 */
+.md-typeset .kb-cover__art {
+  display: block;
+  width: 100%;
+  max-width: 34rem;
+  height: auto;
+  justify-self: end;
+  overflow: visible;
+}
+
+.kb-cover__art .kb-ill-line {
+  stroke: var(--kb-text-strong);
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.kb-cover__art .kb-ill-line:not(.kb-ill-paper, .kb-ill-tone, .kb-ill-accent, .kb-ill-accent-light, .kb-ill-ink) {
+  fill: none;
+}
+
+.kb-cover__art .kb-ill-thick {
+  stroke-width: 5;
+}
+
+.kb-cover__art .kb-ill-thin {
+  stroke-width: 1.5;
+}
+
+.kb-cover__art .kb-ill-soft {
+  stroke: var(--kb-text-faint);
+  stroke-width: 3;
+}
+
+.kb-cover__art .kb-ill-hatch {
+  stroke: var(--kb-text-strong);
+  stroke-width: 1.6;
+  opacity: 0.35;
+}
+
+.kb-cover__art .kb-ill-check {
+  fill: none;
+  stroke: var(--kb-sheet);
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.kb-cover__art .kb-ill-dash {
+  stroke-dasharray: 2 7;
+}
+
+.kb-cover__art .kb-ill-wash {
+  fill: var(--kb-ill-wash);
+}
+
+.kb-cover__art .kb-ill-shadow {
+  fill: var(--kb-text-strong);
+  opacity: 0.07;
+}
+
+.kb-cover__art .kb-ill-paper {
+  fill: var(--kb-sheet);
+}
+
+.kb-cover__art .kb-ill-tone {
+  fill: var(--kb-ill-tone);
+}
+
+.kb-cover__art .kb-ill-ink {
+  fill: var(--kb-text-strong);
+}
+
+.kb-cover__art .kb-ill-accent {
+  fill: var(--kb-gold);
+}
+
+.kb-cover__art .kb-ill-accent-light {
+  fill: var(--kb-ill-accent-light);
+}
+
+.kb-cover__art .kb-ill-seal {
+  fill: none;
+  stroke: var(--kb-gold);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.kb-cover__art .kb-ill-seal.kb-ill-thin {
+  stroke-width: 1.6;
+}
+
+.kb-cover__art .kb-ill-spark {
+  fill: none;
+  stroke: var(--kb-gold);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+}
+
+/* index.md 의 H1과 첫 문단은 표지가 대신한다. 인쇄할 때는 표지 대신 이것을 보인다 */
+.kb-home > h1:first-of-type,
+.kb-home > h1:first-of-type + p {
+  display: none;
+}
+
+.kb-home > h2:first-of-type {
+  margin-top: 0;
+}
+
+@media print {
+  .md-typeset .kb-cover {
+    display: none;
+  }
+
+  .kb-home > h1:first-of-type,
+  .kb-home > h1:first-of-type + p {
+    display: block;
+  }
+}
+
+/* 요약 표 → 대분류 안내판. 표의 행 하나가 안내판 한 칸이 된다.
+ * 열 순서는 작성 가이드 3.4절의 머리글(대분류 · 주요 다룸 분야 · 탐색 가이드 · 바로가기)을
+ * 따른다. 에이전트가 행을 늘리면 칸이 함께 늘어난다. */
+.kb-home h2[id="요약"] + .md-typeset__scrollwrap {
+  overflow: visible;
+}
+
+.kb-home h2[id="요약"] + .md-typeset__scrollwrap .md-typeset__table {
+  padding: 0.2rem 1.8rem;
+  margin: 0;
+}
+
+.kb-home h2[id="요약"] + .md-typeset__scrollwrap table:not([class]) {
+  display: block;
+  border: none;
+  border-radius: 0;
+  overflow: visible;
+  background-color: transparent;
+  box-shadow: none;
+  font-size: var(--kb-fs-md);
+}
+
+.kb-home h2[id="요약"] + .md-typeset__scrollwrap thead {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.kb-home h2[id="요약"] + .md-typeset__scrollwrap tbody {
+  display: block;
+}
+
+.kb-home h2[id="요약"] + .md-typeset__scrollwrap tr:last-child {
+  border-bottom: none;
+}
+
+/* 행 하나 = 대분류 하나. 왼쪽 열에 대분류 이름, 오른쪽 열에 설명·탐색 방법·바로가기를 쌓는다 */
+.kb-home h2[id="요약"] + .md-typeset__scrollwrap tr {
+  display: grid;
+  grid-template-columns: 11rem minmax(0, 1fr);
+  column-gap: 2rem;
+  padding: 1.4rem 0;
+  border-bottom: 1px solid var(--kb-border);
+}
+
+.kb-home h2[id="요약"] + .md-typeset__scrollwrap tbody tr:hover {
+  background-color: transparent;
+}
+
+.kb-home h2[id="요약"] + .md-typeset__scrollwrap td {
+  display: block;
+  grid-column: 2;
+  padding: 0;
+  border: none;
+}
+
+.kb-home h2[id="요약"] + .md-typeset__scrollwrap td:nth-child(1) {
+  grid-column: 1;
+  grid-row: 1 / span 3;
+  color: var(--kb-text-strong);
+  font-family: var(--kb-font-serif);
+  font-size: var(--kb-fs-xl);
+  font-weight: var(--kb-fw-semibold);
+  line-height: 1.5;
+  letter-spacing: -0.02em;
+}
+
+.kb-home h2[id="요약"] + .md-typeset__scrollwrap td:nth-child(2) {
+  color: var(--kb-text);
+}
+
+.kb-home h2[id="요약"] + .md-typeset__scrollwrap td:nth-child(3) {
+  padding-top: 0.4rem;
+  color: var(--kb-text-muted);
+  font-size: var(--kb-fs-sm);
+}
+
+.kb-home h2[id="요약"] + .md-typeset__scrollwrap td:nth-child(4) {
+  padding-top: 0.7rem;
+}
+
+@media screen and (max-width: 44.9375em) {
+  .kb-home h2[id="요약"] + .md-typeset__scrollwrap tr {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 0.4rem;
+  }
+
+  .kb-home h2[id="요약"] + .md-typeset__scrollwrap td:nth-child(n) {
+    grid-column: 1;
+    grid-row: auto;
+  }
+}
+
+/* 최근 업데이트 표 — 분류 칸은 작은 회색 글자 */
+.kb-home h2[id$="최근-업데이트"] ~ .md-typeset__scrollwrap td:first-child {
+  color: var(--kb-text-muted);
+  font-size: var(--kb-fs-xs);
+  font-weight: var(--kb-fw-bold);
+  white-space: nowrap;
+}
+
+.kb-home h2[id$="최근-업데이트"] ~ .md-typeset__scrollwrap td:nth-child(2) {
+  color: var(--kb-text-strong);
+  font-weight: var(--kb-fw-semibold);
+}
+
+/* ---------------------------------------------------------------------------
+ * 11. 바닥글 / 기타
  * ------------------------------------------------------------------------- */
 
 .md-footer {
   background-color: var(--kb-bg);
+  color: var(--kb-text);
   border-top: 1px solid var(--kb-border);
-  margin-top: 2rem;
+  margin-top: 2.4rem;
 }
 
-.md-footer-meta {
-  background-color: transparent;
+/* 이전·다음 문서 — 테두리 상자 두 개. 마우스를 올리면 테라코타 테두리 */
+.md-footer__inner {
+  gap: 1rem;
+  padding-top: 1.4rem;
+  padding-bottom: 1.6rem;
 }
 
 .md-footer__link {
+  flex: 0 1 50%;
+  align-items: center;
+  gap: 0.9rem;
+  margin: 0;
+  padding: 0.85rem 1.1rem;
+  border: 1px solid var(--kb-border);
+  border-radius: var(--kb-radius-lg);
+  background-color: var(--kb-bg);
+  color: var(--kb-text-strong);
   opacity: 1;
-  color: var(--kb-text-muted);
-  transition: color 0.12s var(--kb-ease);
+  transition: border-color 0.15s var(--kb-ease), background-color 0.15s var(--kb-ease);
 }
 
-.md-footer__link:hover {
+.md-footer__link:hover,
+.md-footer__link:focus {
+  border-color: var(--kb-brand-link);
+  background-color: var(--kb-brand-wash);
   color: var(--kb-text-strong);
+  opacity: 1;
+}
+
+.md-footer__link--next {
+  margin-left: auto;
+  justify-content: flex-end;
+  text-align: right;
+}
+
+.md-footer__button {
+  flex: none;
+  margin: 0;
+  padding: 0;
+  color: var(--kb-brand);
 }
 
 .md-footer__title {
-  font-size: 0.76rem;
-  font-weight: 500;
+  position: static;
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  font-size: var(--kb-fs-md);
+  font-weight: var(--kb-fw-semibold);
+  line-height: 1.45;
 }
 
 .md-footer__direction {
-  font-size: 0.6rem;
+  position: static;
+  display: block;
+  margin: 0 0 0.1rem;
+  padding: 0;
   color: var(--kb-text-muted);
+  font-size: var(--kb-fs-xs);
+  font-weight: var(--kb-fw-medium);
   opacity: 1;
 }
 
+/* 바닥 띠 — 짙은 숯색 면에 사이트 이름(명조)과 설명, 저작권과 라이선스 표기 */
+.md-footer-meta {
+  background-color: var(--kb-brand-ink);
+}
+
+.md-footer-meta__inner {
+  padding-top: 1.6rem;
+  padding-bottom: 1.8rem;
+}
+
 .md-copyright {
-  color: var(--kb-text-muted);
-  font-size: 0.68rem;
-  line-height: 1.6;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  color: rgba(255, 255, 255, 0.55);
+  font-size: var(--kb-fs-xs);
+  line-height: 1.7;
+}
+
+.kb-footer-brand {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 0.9rem;
+  margin-bottom: 0.9rem;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.kb-footer-brand__name {
+  color: #ffffff;
+  font-family: var(--kb-font-serif);
+  font-size: var(--kb-fs-xl);
+  font-weight: var(--kb-fw-semibold);
+  letter-spacing: -0.02em;
+}
+
+.kb-footer-brand__desc {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: var(--kb-fs-xs);
 }
 
 .md-copyright__highlight {
-  color: var(--kb-text-muted);
-  font-weight: 500;
+  color: rgba(255, 255, 255, 0.72);
+  font-weight: var(--kb-fw-medium);
 }
 
 /* 서드파티 라이선스 표기 (overrides/partials/copyright.html) */
@@ -1223,38 +2774,46 @@ body {
 }
 
 .md-copyright__licenses a:hover {
-  color: var(--kb-text-strong);
+  color: #ffffff;
 }
 
-/* 맨 위로 버튼 */
+/* 맨 위로 버튼 — Material은 헤더 높이(2.4rem)를 기준으로 3.2rem 에 띄운다 */
 .md-top {
+  top: calc(var(--kb-header-h) + 0.8rem);
   background-color: var(--kb-bg);
   border: 1px solid var(--kb-border);
-  border-radius: var(--kb-radius-sm);
-  box-shadow: none;
-  color: var(--kb-text);
-  font-size: 0.68rem;
+  border-radius: 999px;
+  box-shadow: var(--md-shadow-z2);
+  color: var(--kb-brand);
+  font-size: var(--kb-fs-xs);
+  font-weight: var(--kb-fw-semibold);
+}
+
+@media screen and (min-width: 76.25em) {
+  .md-top {
+    top: calc(var(--kb-chrome-h) + 0.8rem);
+  }
 }
 
 .md-top:hover {
-  background-color: var(--kb-bg-subtle);
-  color: var(--kb-text-strong);
+  background-color: var(--kb-brand-wash);
+  color: var(--kb-brand);
 }
 
 /* instant loading 진행 바 */
 .md-progress {
-  background-color: var(--kb-accent);
+  background-color: var(--kb-brand-link);
 }
 
 /* 텍스트 선택 */
 ::selection {
-  background-color: var(--kb-active);
-  color: var(--kb-text-strong);
+  background-color: var(--kb-selection);
+  color: inherit;
 }
 
 /* 포커스 링 — 키보드 탐색 시에만 */
 :focus-visible {
-  outline: 2px solid var(--kb-text-muted);
+  outline: 2px solid var(--kb-brand-link);
   outline-offset: 2px;
 }
 
@@ -1265,7 +2824,7 @@ body {
 }
 
 /* ---------------------------------------------------------------------------
- * 반응형 — 모바일에서 탭바는 숨겨지고 사이드바는 드로어가 된다
+ * 12. 반응형 — 모바일에서 탭바는 숨겨지고 사이드바는 드로어가 된다
  * ------------------------------------------------------------------------- */
 
 @media screen and (max-width: 76.1875em) {
@@ -1277,31 +2836,91 @@ body {
     height: 5.6rem;
   }
 
+  /* 드로어 머리의 로고 — Material은 링크를 좌우 끝까지 늘이므로 타일 크기로 줄인다 */
+  .md-nav--primary .md-nav__title .md-logo {
+    right: auto;
+    padding: 0.2rem;
+    background: none;
+    color: var(--kb-gold);
+  }
+
   .md-nav--primary .md-nav__title ~ .md-nav__list {
     box-shadow: none;
   }
 
   .md-sidebar--primary .md-nav__link {
     border-radius: 0;
-    padding: 0.5rem 0.8rem;
+    padding: 0.55rem 0.8rem;
+  }
+
+  /* 탭바가 없으므로 고정 열은 헤더 바로 아래에 붙는다 */
+  .md-typeset .kb-release__date,
+  .md-typeset .kb-faq-group__head {
+    top: calc(var(--kb-header-h) + 1rem);
   }
 }
 
 @media screen and (max-width: 44.9375em) {
+  .md-grid {
+    padding-left: 0.8rem;
+    padding-right: 0.8rem;
+  }
+
+  /* 좁은 화면에서는 제목 단계를 한 칸씩 낮춘다 */
   .md-typeset h1 {
-    font-size: 1.35rem;
+    font-size: var(--kb-fs-2xl);
   }
 
   .md-typeset h2 {
-    font-size: 1.1rem;
+    font-size: 1.15rem; /* 23px */
+  }
+
+  .md-typeset .kb-cover {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.2rem;
+    margin: 0 0 2.6rem;
+  }
+
+  .md-typeset .kb-cover__title {
+    font-size: 2.2rem; /* 44px */
+  }
+
+  .md-typeset .kb-cover__lead {
+    font-size: var(--kb-fs-base);
+  }
+
+  .md-typeset .kb-cover__art {
+    order: -1;
+    max-width: 20rem;
+    justify-self: center;
+  }
+
+  .md-content__inner:has(> .kb-home) {
+    padding-top: 1.6rem;
+  }
+
+  .kb-home > .md-typeset__scrollwrap .md-typeset__table,
+  .kb-home h2[id="요약"] + .md-typeset__scrollwrap .md-typeset__table {
+    padding: 0.2rem 1rem;
+  }
+
+  .kb-home h2[id$="탐색-안내"] ~ ul {
+    padding: 1rem 1rem 1rem 2.2rem;
   }
 
   .md-content__inner {
     max-width: none;
   }
 
-  .md-typeset .kb-directory > ul > li {
-    grid-template-columns: 1fr;
-    gap: 0.2rem;
+
+
+
+
+
+
+
+
+  .md-footer__link {
+    flex-basis: auto;
   }
 }

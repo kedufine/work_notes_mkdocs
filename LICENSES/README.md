@@ -60,6 +60,8 @@
 | [Vega-Lite](https://github.com/vega/vega-lite) | 5.23.0 | 차트 문법 | BSD-3-Clause |
 | [Vega-Embed](https://github.com/vega/vega-embed) | 6.29.0 | 차트를 문서에 삽입 | BSD-3-Clause |
 | [Pretendard](https://github.com/orioncactus/pretendard) | 1.3.9 | 사이트 글꼴 | OFL-1.1 |
+| [Noto Serif KR](https://github.com/notofonts/noto-cjk) ([Fontsource](https://github.com/fontsource/font-files) 배포본 `@fontsource-variable/noto-serif-kr`) | 5.3.0 | 문서 제목의 명조 글꼴 | OFL-1.1 |
+| [D2Coding](https://github.com/naver/d2codingfont) (npm 배포본 `d2coding`) | 1.3.2 | 코드와 파일 경로의 고정폭 글꼴 | OFL-1.1 |
 
 ## 4. 목록을 갱신해야 하는 경우
 

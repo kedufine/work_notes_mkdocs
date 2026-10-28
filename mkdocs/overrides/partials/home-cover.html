@@ -1,0 +1,112 @@
+{#-
+  홈 표지 — 왼쪽에 제목·소개·바로가기, 오른쪽에 그림. 그림은 일을 적고 처리하는 업무 목록(체크리스트)과
+  연필, 목록에서 지식의 점들로 이어지는 선이고, 손으로 그린 듯한 떨림(SVG 필터)을 준다.
+
+  · 제목과 소개는 mkdocs.yml 의 site_name, site_description 을 씁니다.
+    index.md 의 H1과 첫 문단은 이 표지가 대신하므로 화면에서 숨깁니다(인쇄할 때만 표시).
+  · 바로가기는 nav 의 두 번째 단계(탭 아래 갈래)에서 읽으므로 메뉴가 바뀌면 함께 바뀝니다.
+  · 그림의 색은 클래스(kb-ill-*)로 칠하고 extra.css 10절에서 디자인 토큰을 입히므로
+    라이트·다크 모드를 따라 바뀝니다. 모양은 extra.css 10절.
+-#}
+{%- macro first_url(item) -%}
+  {%- if item.is_page -%}
+    {{- item.url -}}
+  {%- elif item.children -%}
+    {{- first_url(item.children | first) -}}
+  {%- endif -%}
+{%- endmacro -%}
+<section class="kb-cover" aria-labelledby="kb-cover-title">
+  <div class="kb-cover__text">
+    <h1 class="kb-cover__title" id="kb-cover-title">{{ config.site_name | e }}</h1>
+    {% if config.site_description %}
+      <p class="kb-cover__lead">{{ config.site_description | e }}</p>
+    {% endif %}
+    <nav class="kb-cover__links" aria-label="바로가기">
+      {% for section in nav if section.is_section and section.children %}
+        {% for item in section.children %}
+          {% set href = first_url(item) | trim %}
+          {% if href %}
+            <a href="{{ href | url }}">{{ item.title | e }}</a>
+          {% endif %}
+        {% endfor %}
+      {% endfor %}
+    </nav>
+  </div>
+
+  <svg class="kb-cover__art" viewBox="0 0 520 440" role="img" aria-label="두 가지 일에 체크 표시가 된 업무 목록과 연필, 목록에서 지식의 점들로 이어지는 선">
+    <defs>
+      <!-- 손으로 그린 듯한 떨림 — 선과 면의 가장자리를 아주 조금 흔든다 -->
+      <filter id="kb-hand" x="-5%" y="-5%" width="110%" height="110%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="7"/>
+        <feDisplacementMap in="SourceGraphic" scale="2.6"/>
+      </filter>
+    </defs>
+
+    <g filter="url(#kb-hand)">
+      <!-- 바탕의 둥근 면 -->
+      <path class="kb-ill-wash" d="M58 262C34 160 122 64 250 60c138-4 236 70 228 192-8 118-104 170-232 162C132 408 78 350 58 262Z"/>
+
+      <!-- 바닥 그림자의 빗금 -->
+      <path class="kb-ill-line kb-ill-hatch" d="M150 404l14-12M174 406l16-14M198 407l16-14M222 407l16-14M246 407l16-14M270 407l16-14M294 406l16-14M318 404l16-14M342 401l14-12"/>
+
+      <!-- 이어진 선 — 처리한 일에서 지식의 점으로 -->
+      <path class="kb-ill-line" d="M232 214C222 190 202 170 184 154"/>
+      <path class="kb-ill-line" d="M266 212C272 180 288 152 298 134"/>
+      <path class="kb-ill-line" d="M298 218C324 202 356 194 382 184"/>
+      <path class="kb-ill-line kb-ill-thin" d="M190 140C222 118 262 110 286 114"/>
+      <path class="kb-ill-line kb-ill-thin" d="M316 122C344 128 368 148 380 168"/>
+      <path class="kb-ill-line kb-ill-thin kb-ill-dash" d="M172 146C150 128 132 112 120 92"/>
+
+      <!-- 지식의 점 -->
+      <circle class="kb-ill-paper kb-ill-line" cx="178" cy="146" r="13"/>
+      <circle class="kb-ill-ink" cx="178" cy="146" r="4"/>
+      <circle class="kb-ill-accent kb-ill-line" cx="302" cy="120" r="17"/>
+      <circle class="kb-ill-ink kb-ill-line" cx="388" cy="178" r="9"/>
+      <circle class="kb-ill-paper kb-ill-line" cx="116" cy="86" r="6"/>
+
+      <!-- 떠 있는 문서 한 장(도장 찍힌 결재 문서) -->
+      <g transform="rotate(9 418 104)">
+        <rect class="kb-ill-paper kb-ill-line" x="392" y="68" width="54" height="70" rx="4"/>
+        <path class="kb-ill-line kb-ill-thin" d="M402 84h24M402 94h34M402 104h28"/>
+        <circle class="kb-ill-seal" cx="430" cy="122" r="8"/>
+      </g>
+
+      <!-- 업무 목록(체크리스트) 한 장 -->
+      <g transform="rotate(-4 262 304)">
+        <!-- 뒤에 겹친 한 장 -->
+        <rect class="kb-ill-tone kb-ill-line" x="180" y="214" width="176" height="184" rx="12"/>
+        <rect class="kb-ill-paper kb-ill-line" x="166" y="206" width="176" height="184" rx="12"/>
+        <!-- 머리 -->
+        <path class="kb-ill-line kb-ill-thick" d="M190 236h74"/>
+        <circle class="kb-ill-accent" cx="318" cy="236" r="5"/>
+        <!-- 1. 끝난 일 -->
+        <rect class="kb-ill-accent kb-ill-line" x="190" y="262" width="22" height="22" rx="6"/>
+        <path class="kb-ill-check" d="M195 273l4 4 8-9"/>
+        <path class="kb-ill-line kb-ill-soft" d="M226 269h88M226 279h54"/>
+        <!-- 2. 끝난 일 -->
+        <rect class="kb-ill-accent kb-ill-line" x="190" y="302" width="22" height="22" rx="6"/>
+        <path class="kb-ill-check" d="M195 313l4 4 8-9"/>
+        <path class="kb-ill-line kb-ill-soft" d="M226 309h96M226 319h40"/>
+        <!-- 3. 남은 일 -->
+        <rect class="kb-ill-paper kb-ill-line" x="190" y="342" width="22" height="22" rx="6"/>
+        <path class="kb-ill-line kb-ill-soft" d="M226 349h76M226 359h58"/>
+      </g>
+
+      <!-- 연필 -->
+      <g transform="rotate(-40 382 342)">
+        <rect class="kb-ill-accent kb-ill-line" x="326" y="334" width="96" height="16" rx="3"/>
+        <path class="kb-ill-line kb-ill-thin" d="M336 342h76"/>
+        <rect class="kb-ill-tone kb-ill-line" x="314" y="334" width="14" height="16" rx="3"/>
+        <path class="kb-ill-paper kb-ill-line" d="M422 334l22 8-22 8Z"/>
+        <path class="kb-ill-ink" d="M437 339.4l7 2.6-7 2.6Z"/>
+      </g>
+
+      <!-- 반짝임 — 손으로 그린 네 갈래 별 -->
+      <path class="kb-ill-accent" d="M454 214c3 15 8 20 22 23-14 3-19 8-22 23-3-15-8-20-22-23 14-3 19-8 22-23Z"/>
+      <path class="kb-ill-ink" d="M86 196c2 9 5 12 14 14-9 2-12 5-14 14-2-9-5-12-14-14 9-2 12-5 14-14Z"/>
+      <circle class="kb-ill-ink" cx="228" cy="62" r="3"/>
+      <circle class="kb-ill-ink" cx="468" cy="300" r="3"/>
+      <circle class="kb-ill-accent" cx="58" cy="330" r="4"/>
+    </g>
+  </svg>
+</section>
